@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 13:56:52 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/08/09 00:59:19 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/09/21 19:32:48 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,20 @@ bool	is_op_start(char c)
 	return (c == '|' || c == '<' || c == '>');
 }
 
+void    free_tokens(t_token *tok) //from AL
+{
+    t_token *next;
+
+    while (tok)
+    {
+        next = tok->next;
+        if (tok->value)
+            free(tok->value);
+        free(tok);
+        tok = next;
+    }
+}
+
 t_token	*create_token(t_token_type type, const char *start, size_t len)
 {
 	t_token	*token;
@@ -42,8 +56,15 @@ t_token	*create_token(t_token_type type, const char *start, size_t len)
 	if (!token)
 		return (NULL);
 	token->type = type;
-	token->value = ft_strndup(start, len); // creates a copy of the token's text
 	token->next = NULL;
+	token->value = malloc(len + 1);
+	if (token->value == NULL)
+	{
+		free(token);
+		return (NULL);
+	}
+	ft_memcpy(token->value, start, len);
+	token->value[len] = '\0';
 	return (token);
 }
 
@@ -51,7 +72,9 @@ void	add_token(t_token **head, t_token *new)
 {
 	t_token	*tmp;
 
-	if (!*head)
+	if (!new)
+		return ;
+	if (*head == NULL)
 		*head = new;
 	else
 	{

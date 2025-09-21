@@ -30,7 +30,7 @@ LIBFT_DIR	:= ./libft
 LIBFT	:= $(LIBFT_DIR)/libft.a
 
 # files
-SRC = src/lexer.c src/lexer_utils.c src/main.c
+SRC = src/lexer.c src/lexer_utils.c src/test_tokenizer.c
 OBJ = $(SRC:.c=.o)
 
 INCLUDES = -Iincludes -I$(LIBFT_DIR)

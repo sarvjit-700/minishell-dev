@@ -70,7 +70,7 @@ bool is_whitespace(char c);
 bool is_op_start(char c);
 t_token *create_token(t_token_type type, const char *start, size_t len);
 void add_token(t_token **head, t_token *new);
-
+void    free_tokens(t_token *tok); // move later
 // Lexer functions
 t_token *tokenize(const char **input);
 //t_token *lex_input(const char *input);
