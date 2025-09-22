@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 13:28:59 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/09/21 22:45:21 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/09/22 12:50:55 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,39 +73,63 @@ static char *append_str(char *dest, const char *src, size_t len)
 	return (new_str);	
 }
 
-static char *append_or_fail(char *words, const char *start, size_t len)
+
+static char	*append_until_esc_end(const char **input, char *words)
 {
-    char *res;
+	const char *start;
 	
-	res = append_str(words, start, len);
-    if (res == NULL)
-        return (NULL);
-    return (res);
+	start = *input;
+	while (**input && **input != '"' && **input != '\\')
+		(*input)++;
+	if (*input > start)
+	{
+		words = append_str(words, start, *input - start);
+		if (words == NULL)
+			return (NULL);
+	}
+	return (words);
 }
 
+// handle \" and \\ only
+static char	*handle_esc_char(const char **input, char *words)
+{
+	if (**input == '\\' && (*(*input + 1) == '"' || *(*input + 1) == '\\'))
+	{
+		words = append_str(words, *input + 1, 1);
+		if (words == NULL)
+			return (NULL);
+		*input += 2;
+	}
+	return (words);
+}
 
 static char	*handle_double_quote(const char **input, char *words)
 {
-	const char	*start;
-
-	start = *input;
+	(*input)++;
 	while (**input && **input != '"')
 	{
-		if (**input == '\\' &&(*(*input + 1) == '"' || *(*input + 1) == '\\'))
+		if (**input == '\\' && (*(*input + 1) == '"' || *(*input + 1) == '\\'))
 		{
-			if (*input > start)
-				words = append_or_fail(words, start, *input - start);
-			words = append_or_fail(words, *input + 1, 1);
-			*input += 2;
-			start = *input;
-			continue ;
+			words = handle_esc_char(input, words);
+			if (words == NULL)
+				return (NULL);
 		}
-		(*input)++;
+		else
+		{
+			words = append_until_esc_end(input,words);
+			if (words == NULL)
+				return (NULL);
+		}
+
 	}
-	if (**input == '\0')
+	if (**input != '"')
 		return (NULL);
-	if (*input > start)
-		words = append_or_fail(words, start, *input - start);
+	if (words == NULL)
+	{
+		words = append_str(NULL, "", 0);
+		if (words == NULL)
+			return (NULL);
+	}
 	(*input)++;
 	return (words);
 }
@@ -119,7 +143,9 @@ static char	*handle_single_quote(const char **input, char *words)
 		(*input)++;
 	if (**input == '\0')
 		return (NULL);
-	words = append_or_fail(words, start, *input - start);
+	words = append_str(words, start, *input - start);
+	if (words == NULL)
+		return (NULL);
 	(*input)++;
 	return (words);	
 }
@@ -142,7 +168,11 @@ static char	*append_plain(const char **input, char *words)
 		!is_op_start(**input) && **input != '\'' && **input != '"')
 		(*input)++;
 	if (*input > start)
-		words = append_or_fail(words, start, *input - start);
+	{
+		words = append_str(words, start, *input - start);
+		if (words == NULL)
+			return (NULL);
+	}
 	return (words);
 }
 
@@ -164,15 +194,6 @@ static t_token *extract_words(const char **input)
 	return create_token(TOKEN_WORD, words, ft_strlen(words));
 }
 
-// static t_token	*extract_word(const char **input)
-// {
-// 	const char	*start;
-
-// 	start = *input;
-// 	while (**input != '\0' && !is_whitespace(**input) && !is_op_start(**input))
-// 		(*input)++;
-// 	return (create_token(TOKEN_WORD, start, *input - start));
-// }
 
 t_token	*tokenize(const char **input)
 {
