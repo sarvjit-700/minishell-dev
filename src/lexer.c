@@ -6,13 +6,13 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 13:28:59 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/09/22 12:50:55 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/10/02 12:10:37 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-static t_token	*sym_angle(const char **input)
+static t_token	*op_angle(const char **input)
 {
 	if (**input == '<')
 	{
@@ -39,6 +39,7 @@ static t_token	*sym_angle(const char **input)
 
 static t_token	*extract_operator(const char **input)
 {
+	printf("\nDEBUG: [ex_op] found op '%c'\n", **input);
 	if (**input == '|')
 	{
 		(*input)++;
@@ -46,7 +47,7 @@ static t_token	*extract_operator(const char **input)
 	}
 	else if (**input == '<' || **input == '>')
 	{
-		return (sym_angle(input));
+		return (op_angle(input));
 	}
 	return (NULL);
 }
@@ -56,6 +57,7 @@ static char *append_str(char *dest, const char *src, size_t len)
 	size_t old_len;
 	char	*new_str;
 
+	printf("\nDEBUG: [app_str] words already stored : '%s'\n", dest);
 	if (dest != NULL)
 		old_len = ft_strlen(dest);
 	else
@@ -69,6 +71,7 @@ static char *append_str(char *dest, const char *src, size_t len)
 		free(dest);
 	}
 	ft_memcpy(new_str + old_len, src, len);
+	printf("\nDEBUG:[app_str] storing -> '%s'\n", new_str);
 	new_str[old_len + len] = '\0';
 	return (new_str);	
 }
@@ -79,8 +82,13 @@ static char	*append_until_esc_end(const char **input, char *words)
 	const char *start;
 	
 	start = *input;
+	printf("\nDEBUG: [app until esc](bksl) or quo ->\n");
 	while (**input && **input != '"' && **input != '\\')
+	{
 		(*input)++;
+		printf("\nDEBUG: [app_until] moved to : '%c'\n", **input);
+	}
+	printf("\nDEBUG: [app_until] found : '%c' at %s\n", **input, *input);
 	if (*input > start)
 	{
 		words = append_str(words, start, *input - start);
@@ -93,11 +101,14 @@ static char	*append_until_esc_end(const char **input, char *words)
 // handle \" and \\ only
 static char	*handle_esc_char(const char **input, char *words)
 {
+	printf("\nDEBUG: [handle esc] -> : '%c'\n", **input);
+	printf("DEBUG: check if now bks or NEXT is quo/bksl from '%c'\n", **input);
 	if (**input == '\\' && (*(*input + 1) == '"' || *(*input + 1) == '\\'))
 	{
 		words = append_str(words, *input + 1, 1);
 		if (words == NULL)
 			return (NULL);
+		printf("DEBUG: move 2 spaces from char now'\n");
 		*input += 2;
 	}
 	return (words);
@@ -105,25 +116,33 @@ static char	*handle_esc_char(const char **input, char *words)
 
 static char	*handle_double_quote(const char **input, char *words)
 {
+	printf("\nDEBUG : [hdle_dble_quo] from current '%c' move to '%c'\n", **input, *(*input + 1));
 	(*input)++;
 	while (**input && **input != '"')
 	{
 		if (**input == '\\' && (*(*input + 1) == '"' || *(*input + 1) == '\\'))
 		{
+			printf("DEBUG : [hdq] found esc char %c\n", **input);
 			words = handle_esc_char(input, words);
 			if (words == NULL)
 				return (NULL);
 		}
 		else
 		{
+			printf("DEBUG : [hdq] append until end/bks/quo\n");
 			words = append_until_esc_end(input,words);
 			if (words == NULL)
 				return (NULL);
 		}
 
 	}
+	printf("DEBUG : [hdq] FOUND quo or end \n");
+	printf("DEBUG : [hdq] INPUT NOW -> %c at %s (blank spaces mean end)\n", **input, *input);
 	if (**input != '"')
+	{
+		printf("\nDEBUG: [hdq] quote NOT FOUND - return NULL\n");
 		return (NULL);
+	}
 	if (words == NULL)
 	{
 		words = append_str(NULL, "", 0);
@@ -131,6 +150,7 @@ static char	*handle_double_quote(const char **input, char *words)
 			return (NULL);
 	}
 	(*input)++;
+	printf("DEBUG : Leaving [hdq] go back to [ext_wrds] with %c from %s", **input, *input);
 	return (words);
 }
 
@@ -139,6 +159,7 @@ static char	*handle_single_quote(const char **input, char *words)
 	const char	*start;
 
 	start = *input;
+	printf("\nDEBUG: [HSQ]\n");
 	while (**input && **input != '\'')
 		(*input)++;
 	if (**input == '\0')
@@ -152,6 +173,7 @@ static char	*handle_single_quote(const char **input, char *words)
 
 static char	*append_quoted(const char **input, char *words)
 {
+	printf("\nDEBUG: [app_quo] quo type => '%c'\n Remaining input [%s]\n Already stored [%s]\n", **input, *input, words);
     if (**input == '"')
         return handle_double_quote(input, words);
     else // single quote
@@ -164,15 +186,23 @@ static char	*append_plain(const char **input, char *words)
 	const char	*start;
 	
 	start = *input;
+	printf("\nDEBUG: [app_pln] going until spc/op/esc/quo \n");
 	while (**input && !is_whitespace(**input) && \
 		!is_op_start(**input) && **input != '\'' && **input != '"')
+	{
 		(*input)++;
+		printf("\nDEBUG: [app_pln] looking for end/bks/quo : '%c' at %s\n", **input, *input);
+	}
+		
+	printf("\nDEBUG: [app_pln] found end/bks/quo : '%c' before %s\n Now store/append all until here. \n", **input, *input);
 	if (*input > start)
 	{
 		words = append_str(words, start, *input - start);
+		printf("\nDEBUG: [app_pln] after append : '%s'\n", words);
 		if (words == NULL)
 			return (NULL);
 	}
+	printf("DEBUG : Leaving [app_pln] go back to [ext_wrds] with %c from %s", **input, *input);
 	return (words);
 }
 
@@ -184,6 +214,7 @@ static t_token *extract_words(const char **input)
 	words = NULL;
 	while (**input && !is_whitespace(**input) && !is_op_start(**input))
 	{
+		printf("\nDEBUG: [ext_wrds] in loop until end/spc/op\n**INPUT now ---> %s \n", *input);
 		if (**input == '\'' || **input == '"') // '\'' means ' \is an escape
 			words = append_quoted(input, words);
 		else
@@ -191,6 +222,7 @@ static t_token *extract_words(const char **input)
 		if (words == NULL)
 			return (NULL);
 	}
+	printf("DEBUG: [ext_wrds] create token\n");
 	return create_token(TOKEN_WORD, words, ft_strlen(words));
 }
 
@@ -204,9 +236,10 @@ t_token	*tokenize(const char **input)
 	new_token = NULL;
 	while (**input != '\0')
 	{
-		//printf("DEBUG: at char '%c'\n", **input);
+		printf("DEBUG: [tokenize] now at char '%c'\n", **input);
 		if (is_whitespace(**input))
 		{
+			printf("\n -- space found, move on --  \n");
 			(*input)++;
 			continue ;
 		}

@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 13:56:52 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/09/21 19:32:48 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/10/01 11:39:16 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,7 @@ void	add_token(t_token **head, t_token *new)
 {
 	t_token	*tmp;
 
+	printf("\nDEBUG: NEW TOKN --> %s \n", new->value);
 	if (!new)
 		return ;
 	if (*head == NULL)

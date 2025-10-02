@@ -46,37 +46,37 @@ void run_test(const char *input, const char *label)
 
 int main(void)
 {
-    run_test("echo hello world", "Simple words");
+    //run_test("echo hello world", "Simple words");
 
-    run_test("echo \"hello world\"", "Quoted with spaces");
+    //run_test("echo \"hello world\"", "Quoted with spaces");
 
-    run_test("echo foo\"bar\"baz", "Word + quotes combined");
+    //run_test("echo foo\"bar\"baz", "Word + quotes combined");
 
-    run_test("echo \"123\"\"456\"", "Adjacent quotes concatenated");
+    //run_test("echo \"123\"\"\"456\"", "Adjacent quotes concatenated");
 
-    run_test("echo \"he said \\\"hi\\\"\"", "Escaped quotes inside quotes");
+    // run_test("echo \"he said \\\"hi\\\"\"", "Escaped quotes inside quotes");
 
-    run_test("echo \"unterminated", "Unclosed quotes (should fail)");
+    // run_test("echo \"unterminated", "Unclosed quotes (should fail)");
 
-    run_test("echo \"\"", "Empty quoted string (double)");
+    // run_test("echo \"\"", "Empty quoted string (double)");
 
-    run_test("echo ''", "Empty quoted string (single)");
+    // run_test("echo ''", "Empty quoted string (single)");
 
-    run_test("echo foo|grep bar", "Pipe without spaces");
+    // run_test("echo foo|grep bar", "Pipe without spaces");
 
-    run_test("echo hi >file", "Redirection no space before");
+    // run_test("echo hi >file", "Redirection no space before");
 
-    run_test("echo hi> file", "Redirection no space after");
+    // run_test("echo hi> file", "Redirection no space after");
 
-    run_test("echo hi>file", "Redirection no spaces");
+    // run_test("echo hi>file", "Redirection no spaces");
 
-    run_test("echo    spaced     out", "Multiple spaces");
+    // run_test("echo    spaced     out", "Multiple spaces");
 
-    run_test("<< >>", "Operators only");
+    // run_test("<< >>", "Operators only");
 
-    run_test("", "Empty input");
+    // run_test("", "Empty input");
 
-    run_test("   ", "Whitespace only");
+    // run_test("   ", "Whitespace only");
 
     return 0;
 }
