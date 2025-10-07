@@ -34,17 +34,17 @@ bool	is_op_start(char c)
 	return (c == '|' || c == '<' || c == '>');
 }
 
-void    free_tokens(t_token *tok) //from AL
+void    free_tokens(t_token *token) //from AL
 {
     t_token *next;
 
-    while (tok)
+    while (token)
     {
-        next = tok->next;
-        if (tok->value)
-            free(tok->value);
-        free(tok);
-        tok = next;
+        next = token->next;
+        if (token->value)
+            free(token->value);
+        free(token);
+        token = next;
     }
 }
 
