@@ -12,7 +12,7 @@
 
 #include "../includes/minishell.h"
 
-static t_token	*sym_angle(const char **input)
+static t_token	*angle_op(const char **input)
 {
 	if (**input == '<')
 	{
@@ -46,7 +46,7 @@ static t_token	*extract_operator(const char **input)
 	}
 	else if (**input == '<' || **input == '>')
 	{
-		return (sym_angle(input));
+		return (angle_op(input));
 	}
 	return (NULL);
 }
@@ -93,9 +93,15 @@ static char	*append_until_esc_end(const char **input, char *words)
 // handle \" and \\ only
 static char	*handle_esc_char(const char **input, char *words)
 {
-	if (**input == '\\' && (*(*input + 1) == '"' || *(*input + 1) == '\\'))
+	char	c;
+
+	if (**input == '\\' && *(*input + 1))
 	{
-		words = append_str(words, *input + 1, 1);
+		c = *(*input + 1);
+		if (c == '"' || c == '\\')
+			words = append_str(words, &c, 1);
+		else
+			words = append_str(words, *input, 2);
 		if (words == NULL)
 			return (NULL);
 		*input += 2;
@@ -108,22 +114,18 @@ static char	*handle_double_quote(const char **input, char *words)
 	(*input)++;
 	while (**input && **input != '"')
 	{
-		if (**input == '\\' && (*(*input + 1) == '"' || *(*input + 1) == '\\'))
-		{
+		if (**input == '\\')
 			words = handle_esc_char(input, words);
-			if (words == NULL)
-				return (NULL);
-		}
 		else
-		{
 			words = append_until_esc_end(input,words);
-			if (words == NULL)
+		if (words == NULL)
 				return (NULL);
-		}
-
 	}
 	if (**input != '"')
+	{
+		free(words);   // clean up anything we built so far
 		return (NULL);
+	}
 	if (words == NULL)
 	{
 		words = append_str(NULL, "", 0);
@@ -134,15 +136,20 @@ static char	*handle_double_quote(const char **input, char *words)
 	return (words);
 }
 
+
 static char	*handle_single_quote(const char **input, char *words)
 {
 	const char	*start;
 
+	(*input)++;
 	start = *input;
 	while (**input && **input != '\'')
 		(*input)++;
 	if (**input == '\0')
-		return (NULL);
+    {
+        free(words);
+        return (NULL);
+    }
 	words = append_str(words, start, *input - start);
 	if (words == NULL)
 		return (NULL);
@@ -180,6 +187,7 @@ static char	*append_plain(const char **input, char *words)
 static t_token *extract_words(const char **input)
 {
 	char	*words;
+	t_token	*token;
 	
 	words = NULL;
 	while (**input && !is_whitespace(**input) && !is_op_start(**input))
@@ -191,7 +199,9 @@ static t_token *extract_words(const char **input)
 		if (words == NULL)
 			return (NULL);
 	}
-	return create_token(TOKEN_WORD, words, ft_strlen(words));
+	token = create_token(TOKEN_WORD, words, ft_strlen(words));
+	free(words);
+	return (token);
 }
 
 
@@ -217,7 +227,7 @@ t_token	*tokenize(const char **input)
 		if (new_token)
 			add_token(&head, new_token);
 		else
-			break ;
+			break;
 	}
 	return (head);
 }
