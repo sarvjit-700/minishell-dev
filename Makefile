@@ -21,19 +21,25 @@ YELLOW = \033[1;33m
 NAME = minishell
 
 # flags
-CC = gcc
+CC = cc
 CFLAGS = -Wall -Wextra -Werror -g
 RM = rm -rf
 
 # paths
 LIBFT_DIR	:= ./libft
 LIBFT	:= $(LIBFT_DIR)/libft.a
+EXEC	:= ./src/execution
+BUILTINS := ./src/builtins
 
 # files
-SRC = src/lexer.c src/lexer_utils.c src/test_tokenizer.c
+SRC = src/lexer.c src/lexer_utils.c src/parser.c\
+ 	$(EXEC)/exec_simple.c $(EXEC)/paths.c\
+	$(BUILTINS)/builtin_main.c $(BUILTINS)/builtin_echo.c $(BUILTINS)/builtin_cd.c
 OBJ = $(SRC:.c=.o)
 
 INCLUDES = -Iincludes -I$(LIBFT_DIR)
+LDFLAGS = -lreadline
+
 
 # rules
 all: $(LIBFT) $(NAME)
@@ -42,7 +48,7 @@ src/%.o : src/%.c
 	@$(CC) $(CFLAGS) -o $@ -c $< $(INCLUDES) && printf "Compiling: $(notdir $<)\n"
 
 $(NAME): $(OBJ)
-	$(CC) $(CFLAGS) $(OBJ) $(LIBFT) -o $(NAME)
+	$(CC) $(CFLAGS) $(OBJ) $(LIBFT) -o $(NAME) -lreadline
 	printf "Linking executable	$(GREEN)[OK]$(RESET)\n"
 
 $(LIBFT):

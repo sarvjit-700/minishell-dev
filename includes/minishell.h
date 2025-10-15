@@ -19,6 +19,13 @@
 # include <string.h>
 # include <unistd.h>
 # include <stdbool.h>
+# include <signal.h>
+# include <sys/wait.h>
+# include <errno.h>
+# include <fcntl.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+
 
 // -- For Lexer -- //
 typedef enum e_token_type 
@@ -63,6 +70,15 @@ typedef struct s_parser_state
     t_cmd   *curr;
 }   t_parser_state;
 
+// -- For Execution --//
+typedef struct s_env
+{
+	char			*key; // variable type
+	char			*value; // content
+	struct s_env	*next;
+}	t_env;
+
+
 
 // lexer-utils //
 char *ft_strndup(const char *s, size_t n);
@@ -71,10 +87,30 @@ bool is_op_start(char c);
 t_token *create_token(t_token_type type, const char *start, size_t len);
 void add_token(t_token **head, t_token *new);
 void    free_tokens(t_token *tok); // move later
-// Lexer functions
+
+// -- Lexer functions -- //
 t_token *tokenize(const char **input);
 //t_token *lex_input(const char *input);
 //void print_tokens(t_token *head);
 //void free_tokens(t_token *head);
+
+// -- for testing parser -- //
+t_cmd   *parse_tokens(t_token *tokens);
+void free_cmd_list(t_cmd *cmd);
+
+// -- execution --//
+char	*find_exec(char *cmd, char **envp);
+char    *get_env_value(t_env *env_list, const char *key); //move to utils later
+int builtin_pwd(void); // move later
+
+// -- builtins -- //
+// -- main -- //
+int is_builtin(const char *cmd);
+int	exec_builtin(t_cmd *cmd, t_env *env_list);
+
+// -- builtin echo, cd -- //
+int builtin_echo(char **argv);
+int builtin_cd(t_cmd *cmd, t_env *env_list);
+
 
 #endif
