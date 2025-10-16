@@ -1,24 +1,36 @@
-char	*find_executable(char *cmd, char **envp)
+void	set_new_env(t_env **env_list, char *key, char *value)
 {
-	char	*env_path;
-	char	**paths;
-	char	*full_path;
+	t_env	*new;
 
-	if (!cmd || !*cmd)
-		return (NULL);
+	new = malloc(sizeof(t_env));
+	new->key = ft_strdup(key);
+	if (value != NULL)
+		new->value = ft_strdup(value);
+	else
+		new->value = NULL;
+	new->exported = true;
+	new->next = *env_list;
+	*env_list = new;
+}
 
-	// if cmd contains '/', it’s a direct path
-	if (ft_strchr(cmd, '/'))
-		return (try_direct_path(cmd));
+void	set_env(t_env **env_list, const char *key, const char *value)
+{
+	t_env	*curr;
 
-	env_path = get_env_path(envp);
-	if (!env_path)
-		return (NULL);
-
-	paths = ft_split(env_path, ':');
-	if (!paths)
-		return (NULL);
-
-	full_path = search_in_paths(paths, cmd);
-	return (full_path);
+	curr = *env_list;
+	while (curr)
+	{
+		if (ft_strncmp(curr->key, key, ft_strlen(key)) == 0)
+		{
+			free(curr->value);
+			if (value != NULL)
+				curr->value = ft_strdup(value);
+			else
+				curr->value = NULL;
+			curr->exported = true;
+			return ;
+		}
+		curr = curr->next;
+	}
+	set_new_env(env_list, key, value);
 }

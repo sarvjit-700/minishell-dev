@@ -34,7 +34,7 @@ BUILTINS := ./src/builtins
 # files
 SRC = src/lexer.c src/lexer_utils.c src/parser.c\
  	$(EXEC)/exec_simple.c $(EXEC)/paths.c\
-	$(BUILTINS)/builtin_main.c $(BUILTINS)/builtin_echo.c $(BUILTINS)/builtin_cd.c
+	$(BUILTINS)/builtin_main.c $(BUILTINS)/builtin_echo.c $(BUILTINS)/builtin_cd.c $(BUILTINS)/builtin_export.c
 OBJ = $(SRC:.c=.o)
 
 INCLUDES = -Iincludes -I$(LIBFT_DIR)

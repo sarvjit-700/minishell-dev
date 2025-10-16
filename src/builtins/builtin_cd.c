@@ -12,7 +12,7 @@
 
 #include "../includes/minishell.h"
 
-int builtin_cd(t_cmd *cmd, t_env *env_list)
+int builtin_cd(t_cmd *cmd)
 {
     const char  *home;
     const char  *oldpwd;
@@ -20,7 +20,7 @@ int builtin_cd(t_cmd *cmd, t_env *env_list)
 
     if (!cmd->argv[1] || ft_strncmp(cmd->argv[1], "~", 1) == 0)
     {
-        home = get_env_value(env_list, "HOME");
+        home = getenv("HOME");
         if (!home)
         {
             perror("minishell: cd: HOME not set");
@@ -34,7 +34,7 @@ int builtin_cd(t_cmd *cmd, t_env *env_list)
     }
     else if (cmd->argv[1] && ft_strncmp(cmd->argv[1], "-", 1) == 0)
     {
-        oldpwd = get_env_value(env_list, "OLDPWD");
+        oldpwd = getenv("OLDPWD");
         if (!oldpwd)
         {
             perror("minishell: cd: OLDPWD not set");
@@ -45,6 +45,8 @@ int builtin_cd(t_cmd *cmd, t_env *env_list)
             perror("minishell: cd");
             return (1);
         }
+        // need to display home DIR\n before prompt
+        printf("DISPLAY PREV DIR HERE\n");
     }
     else
     {
@@ -59,7 +61,8 @@ int builtin_cd(t_cmd *cmd, t_env *env_list)
         perror("minishell: cd");
         return (1);
     }
-    setenv("OLDPWD", get_env_value(env_list, "PWD"), 1);
+
+    setenv("OLDPWD", getenv("PWD"), 1);
     setenv("PWD", cwd, 1);
     return (0);
 }

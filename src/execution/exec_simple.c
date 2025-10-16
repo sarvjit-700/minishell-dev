@@ -12,18 +12,6 @@
 
 #include "../includes/minishell.h"
 
-
-char    *get_env_value(t_env *env_list, const char *key)
-{
-    while (env_list)
-    {
-        if (ft_strncmp(env_list->key, key, ft_strlen(key)) == 0)
-            return (env_list->value);
-        env_list = env_list->next;
-    }
-    return (NULL);
-}
-
 int builtin_pwd(void) //move this to another file later
 {
     char    cwd[1024];
@@ -37,7 +25,7 @@ int builtin_pwd(void) //move this to another file later
     return (0);
 }
 
-int execute_command(t_cmd *cmd, char **envp, t_env *env_list)
+int execute_command(t_cmd *cmd, char **envp, t_env **env_list)
 {
     char *path;
     pid_t pid;
@@ -133,6 +121,7 @@ int	main(int argc, char **argv, char **envp)
 
 	(void)argc;
 	(void)argv;
+	env_list = NULL;
 	env_list = env_init(envp);
 	if (!env_list)
 	{
@@ -156,7 +145,7 @@ int	main(int argc, char **argv, char **envp)
 		cmds = parse_tokens(tokens);
         //expand_all_cmds(cmds, env_list); // need to implement later
 		if (cmds)
-			execute_command(cmds, envp, env_list);
+			execute_command(cmds, envp, &env_list);
 
 		free_tokens(tokens);
 		free_cmd_list(cmds);

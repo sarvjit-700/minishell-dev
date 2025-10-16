@@ -73,8 +73,9 @@ typedef struct s_parser_state
 // -- For Execution --//
 typedef struct s_env
 {
-	char			*key; // variable type
-	char			*value; // content
+	char    *key; // variable type
+	char    *value; // content
+    bool    exported;
 	struct s_env	*next;
 }	t_env;
 
@@ -100,17 +101,18 @@ void free_cmd_list(t_cmd *cmd);
 
 // -- execution --//
 char	*find_exec(char *cmd, char **envp);
-char    *get_env_value(t_env *env_list, const char *key); //move to utils later
 int builtin_pwd(void); // move later
 
 // -- builtins -- //
 // -- main -- //
 int is_builtin(const char *cmd);
-int	exec_builtin(t_cmd *cmd, t_env *env_list);
+int	exec_builtin(t_cmd *cmd, t_env **env_list);
+void set_env(t_env **env_list, const char *key, const char *value);
 
 // -- builtin echo, cd -- //
 int builtin_echo(char **argv);
-int builtin_cd(t_cmd *cmd, t_env *env_list);
+int builtin_cd(t_cmd *cmd);
+int builtin_export(t_cmd *cmd, t_env **env_list);
 
 
 #endif
