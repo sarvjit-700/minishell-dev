@@ -37,13 +37,29 @@ int	exec_builtin(t_cmd *cmd, t_env **env_list)
 		return (builtin_pwd());
 	if (ft_strncmp(cmd->argv[0], "export", 7) == 0)
 		return (builtin_export(cmd, env_list));
-	// if (ft_strncmp(cmd->argv[0], "unset", 6) == 0)
-	// 	return (builtin_unset(cmd->argv, env_list));
-	// if (ft_strncmp(cmd->argv[0], "env", 4) == 0)
-	// 	return (builtin_env(env_list));
-	// if (ft_strncmp(cmd->argv[0], "exit", 5) == 0)
-	// 	return (builtin_exit(cmd->argv));
+	if (ft_strncmp(cmd->argv[0], "unset", 6) == 0)
+		return (builtin_unset(cmd, env_list));
+	if (ft_strncmp(cmd->argv[0], "env", 4) == 0)
+		return (builtin_env(*env_list));
+	if (ft_strncmp(cmd->argv[0], "exit", 5) == 0)
+		return (builtin_exit(cmd));
 	return (0); // Not a builtin
+}
+
+int	is_valid_var(char *var)
+{
+	int	i;
+
+	if (!var || (!ft_isalpha(var[0]) && var[0] != '_'))
+		return (0);
+	i = 1;
+	while (var[i] != '\0')
+	{
+		if (!ft_isalnum(var[i]) && var[i] != '_')
+			return (0);
+		i++;
+	}
+	return (1);
 }
 
 char *get_env_value(t_env *env_list, const char *key)

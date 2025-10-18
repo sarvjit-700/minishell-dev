@@ -104,6 +104,7 @@ t_env	*env_init(char **envp)
 			node->key = ft_strdup(envp[i]);
 			node->value = NULL;
 		}
+		node->exported = true;
 		node->next = head;
 		head = node;
 		i++;

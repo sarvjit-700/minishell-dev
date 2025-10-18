@@ -6,33 +6,11 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 11:44:03 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/10/18 10:58:07 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/10/18 13:30:19 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-
-static int	is_valid_var(char *var)
-{
-	int	i;
-
-	if (!var || (!ft_isalpha(var[0]) && var[0] != '_'))
-	{
-		printf("NEED ERROR MSG\n");
-		return (0);
-	}
-	i = 1;
-	while (var[i] != '\0')
-	{
-		if (!ft_isalnum(var[i]) && var[i] != '_')
-		{
-			printf("NEED SOME ERROR MSG\n");
-			return (0);
-		}
-		i++;
-	}
-	return (1);
-}
 
 void	print_exported_vars(t_env *env_list)
 {
