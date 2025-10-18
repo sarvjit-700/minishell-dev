@@ -32,7 +32,7 @@ int	exec_builtin(t_cmd *cmd, t_env **env_list)
 	if (ft_strncmp(cmd->argv[0], "echo", 5) == 0)
 		return (builtin_echo(cmd->argv));
 	if (ft_strncmp(cmd->argv[0], "cd", 3) == 0)
-	 	return (builtin_cd(cmd));
+	 	return (builtin_cd(cmd, env_list));
 	if (ft_strncmp(cmd->argv[0], "pwd", 4) == 0)
 		return (builtin_pwd());
 	if (ft_strncmp(cmd->argv[0], "export", 7) == 0)
@@ -44,6 +44,17 @@ int	exec_builtin(t_cmd *cmd, t_env **env_list)
 	// if (ft_strncmp(cmd->argv[0], "exit", 5) == 0)
 	// 	return (builtin_exit(cmd->argv));
 	return (0); // Not a builtin
+}
+
+char *get_env_value(t_env *env_list, const char *key)
+{
+    while (env_list)
+    {
+        if (ft_strcmp(env_list->key, key) == 0)
+            return (env_list->value);
+        env_list = env_list->next;
+    }
+    return (NULL);
 }
 
 
@@ -69,7 +80,7 @@ void	set_env(t_env **env_list, const char *key, const char *value)
 	curr = *env_list;
 	while (curr)
 	{
-		if (ft_strncmp(curr->key, key, ft_strlen(key)) == 0)
+		if (ft_strcmp(curr->key, key) == 0)
 		{
 			free(curr->value);
 			if (value != NULL)

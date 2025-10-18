@@ -107,11 +107,12 @@ int builtin_pwd(void); // move later
 // -- main -- //
 int is_builtin(const char *cmd);
 int	exec_builtin(t_cmd *cmd, t_env **env_list);
+char *get_env_value(t_env *env_list, const char *key);
 void set_env(t_env **env_list, const char *key, const char *value);
 
 // -- builtin echo, cd -- //
 int builtin_echo(char **argv);
-int builtin_cd(t_cmd *cmd);
+int builtin_cd(t_cmd *cmd, t_env **env_list);
 int builtin_export(t_cmd *cmd, t_env **env_list);
 
 

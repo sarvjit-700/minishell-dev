@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 11:44:03 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/10/16 21:09:31 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/10/18 10:58:07 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,15 +34,15 @@ static int	is_valid_var(char *var)
 	return (1);
 }
 
-void	print_exported_vars(t_env *env)
+void	print_exported_vars(t_env *env_list)
 {
-	while (env)
+	while (env_list)
 	{
-		printf("declare -x %s", env->key);
-		if (env->value)
-			printf("=\"%s\"", env->value);
+		printf("declare -x %s", env_list->key);
+		if (env_list->value)
+			printf("=\"%s\"", env_list->value);
 		printf("\n");
-		env = env->next;
+		env_list = env_list->next;
 	}
 }
 
@@ -62,7 +62,6 @@ int	builtin_export(t_cmd *cmd, t_env **env_list)
 	while (cmd->argv[i])
 	{
 		eq = ft_strchr(cmd->argv[i], '=');
-		printf("i = %d, %s, eq = %s\n", i, cmd->argv[i], eq);
 		if (eq)
 		{
 			key = ft_substr(cmd->argv[i], 0, eq - cmd->argv[i]);
