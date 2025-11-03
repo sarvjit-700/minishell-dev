@@ -79,6 +79,14 @@ typedef struct s_env
 	struct s_env	*next;
 }	t_env;
 
+// -- For Pipeline -- //
+typedef struct s_pipe_data 
+{
+    int     i;
+    int     cmd_count;
+    int     **pipes;
+    t_env   **env_list;
+} t_pipe_data;
 
 
 // lexer-utils //
@@ -102,6 +110,7 @@ void free_cmd_list(t_cmd *cmd);
 // -- execution --//
 char	*find_exec(char *cmd, char **envp);
 int builtin_pwd(void); // move later
+int apply_redirs(t_cmd *cmd);
 
 // -- builtins -- //
 // -- main -- //
@@ -118,6 +127,10 @@ int builtin_export(t_cmd *cmd, t_env **env_list);
 int builtin_unset(t_cmd *cmd, t_env **env_list);
 int builtin_env(t_env *env_list);
 int builtin_exit(t_cmd *cmd);
+
+// -- PIPEX -- //
+//int execute_pipeline(t_cmd *cmd_list, char **envp, t_env **env_list);
+int    init_pipe_data(t_cmd *cmd_list, char **envp, t_env **env_list);
 
 
 #endif

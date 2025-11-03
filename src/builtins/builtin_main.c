@@ -14,15 +14,15 @@
 
 int is_builtin(const char *cmd)
 {
-    if (!cmd)
-        return (0);
-    return (!ft_strncmp(cmd, "echo", 5)
-        || !ft_strncmp(cmd, "cd", 3)
-        || !ft_strncmp(cmd, "pwd", 4)
-        || !ft_strncmp(cmd, "export", 7)
-        || !ft_strncmp(cmd, "unset", 6)
-        || !ft_strncmp(cmd, "env", 4)
-        || !ft_strncmp(cmd, "exit", 5));
+    if (!cmd){
+        return (0);}
+    return (!ft_strcmp(cmd, "echo")
+        || !ft_strcmp(cmd, "cd")
+        || !ft_strcmp(cmd, "pwd")
+        || !ft_strcmp(cmd, "export")
+        || !ft_strcmp(cmd, "unset")
+        || !ft_strcmp(cmd, "env")
+        || !ft_strcmp(cmd, "exit"));
 }
 
 int	exec_builtin(t_cmd *cmd, t_env **env_list)

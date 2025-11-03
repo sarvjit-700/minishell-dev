@@ -33,10 +33,11 @@ BUILTINS := ./src/builtins
 
 # files
 SRC = src/lexer.c src/lexer_utils.c src/parser.c\
- 	$(EXEC)/exec_simple.c $(EXEC)/paths.c\
+ 	$(EXEC)/exec_simple.c $(EXEC)/paths.c $(EXEC)/redirs.c $(EXEC)/pipeline.c\
 	$(BUILTINS)/builtin_main.c $(BUILTINS)/builtin_echo.c\
 	$(BUILTINS)/builtin_cd.c $(BUILTINS)/builtin_export.c\
-	$(BUILTINS)/builtin_unset.c $(BUILTINS)/builtin_env.c $(BUILTINS)/builtin_exit.c
+	$(BUILTINS)/builtin_unset.c $(BUILTINS)/builtin_env.c\
+	$(BUILTINS)/builtin_exit.c $(BUILTINS)/builtin_pwd.c
 OBJ = $(SRC:.c=.o)
 
 INCLUDES = -Iincludes -I$(LIBFT_DIR)

@@ -1,36 +1,27 @@
-void	set_new_env(t_env **env_list, char *key, char *value)
+static int	*create_pids(t_cmd *cmd_list, int cmd_count, int **pipes,
+		char **envp, t_env **env_list)
 {
-	t_env	*new;
+	int		i;
+	t_cmd	*cmd;
+	pid_t	*pids;
 
-	new = malloc(sizeof(t_env));
-	new->key = ft_strdup(key);
-	if (value != NULL)
-		new->value = ft_strdup(value);
-	else
-		new->value = NULL;
-	new->exported = true;
-	new->next = *env_list;
-	*env_list = new;
-}
-
-void	set_env(t_env **env_list, const char *key, const char *value)
-{
-	t_env	*curr;
-
-	curr = *env_list;
-	while (curr)
+	pids = malloc(sizeof(pid_t) * cmd_count);
+	if (!pids)
+		return (handle_error("malloc failed", NULL, pipes, cmd_count));
+	i = 0;
+	cmd = cmd_list;
+	while (i < cmd_count)
 	{
-		if (ft_strncmp(curr->key, key, ft_strlen(key)) == 0)
+		pids[i] = fork();
+		if (pids[i] == -1)
+			return (handle_error("fork failed", pids, pipes, cmd_count));
+		if (pids[i] == 0)
 		{
-			free(curr->value);
-			if (value != NULL)
-				curr->value = ft_strdup(value);
-			else
-				curr->value = NULL;
-			curr->exported = true;
-			return ;
+			child_process(cmd, pipes, i, cmd_count, envp, env_list);
+			return (NULL);
 		}
-		curr = curr->next;
+		cmd = cmd->next;
+		i++;
 	}
-	set_new_env(env_list, key, value);
+	return (pids);
 }
