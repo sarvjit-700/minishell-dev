@@ -21,11 +21,13 @@
 # include <stdbool.h>
 # include <signal.h>
 # include <sys/wait.h>
+# include <sys/stat.h>
 # include <errno.h>
 # include <fcntl.h>
-#include <readline/readline.h>
-#include <readline/history.h>
+# include <readline/readline.h>
+# include <readline/history.h>
 
+extern int g_exit_code;
 
 // -- For Lexer -- //
 typedef enum e_token_type 
@@ -71,6 +73,7 @@ typedef struct s_parser_state
 }   t_parser_state;
 
 // -- For Execution --//
+
 typedef struct s_env
 {
 	char    *key; // variable type
@@ -88,6 +91,15 @@ typedef struct s_pipe_data
     t_env   **env_list;
 } t_pipe_data;
 
+typedef struct s_shell
+{
+	t_env    *env_list;
+	t_token  *tokens;
+	t_cmd    *cmd_list;
+	char     *line;
+	int       last_status;
+	int       running;
+}	t_shell;
 
 // lexer-utils //
 char *ft_strndup(const char *s, size_t n);
@@ -95,7 +107,7 @@ bool is_whitespace(char c);
 bool is_op_start(char c);
 t_token *create_token(t_token_type type, const char *start, size_t len);
 void add_token(t_token **head, t_token *new);
-void    free_tokens(t_token *tok); // move later
+
 
 // -- Lexer functions -- //
 t_token *tokenize(const char **input);
@@ -132,5 +144,33 @@ int builtin_exit(t_cmd *cmd);
 //int execute_pipeline(t_cmd *cmd_list, char **envp, t_env **env_list);
 int    init_pipe_data(t_cmd *cmd_list, char **envp, t_env **env_list);
 
+void    *handle_ptr_err(const char *msg, int code); //move 
+
+// -- PIPE_UTILS --//
+int	**create_pipes(t_pipe_data *data);
+void	close_parent_pipes(t_pipe_data *data);
+void	child_process(t_pipe_data *data, t_cmd *cmd, char **envp);
+
+// -- CLEANUP -- //
+void	free_redir(t_redir *rdr); //
+void free_pipe_data(t_pipe_data *data);
+void cleanup_simple(t_shell *shell);
+void cleanup_shell(t_shell *shell);
+void	free_cmd_list(t_cmd *cmd);
+void    free_tokens(t_token *token); // move later
+int extract_exit_code(int status); //move later
+
+
+// -- Signal Handler -- //
+void sigint_handler(int sig);
+void sigquit_handler(int sig);
+void setup_signal_handlers(void);
+
+// -- Expand Vars -- //
+void    expand_vars(t_shell *shell);
+
+// -- Handle Error -- //
+//void handle_exec_error(char *cmd);
+void handle_exec_error(const char *path, int child);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/18 14:20:58 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/10/18 15:21:22 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/14 08:47:15 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,8 @@ int	builtin_exit(t_cmd *cmd)
 {
 	int	exit_code;
 
-	printf("exit\n");
+	if (isatty(STDIN_FILENO))
+    	printf("exit\n");
 	exit_code = 0;
 	if (!cmd->argv[1])
 		exit(0);

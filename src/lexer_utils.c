@@ -34,20 +34,6 @@ bool	is_op_start(char c)
 	return (c == '|' || c == '<' || c == '>');
 }
 
-void    free_tokens(t_token *tok) //from AL
-{
-    t_token *next;
-
-    while (tok)
-    {
-        next = tok->next;
-        if (tok->value)
-            free(tok->value);
-        free(tok);
-        tok = next;
-    }
-}
-
 t_token	*create_token(t_token_type type, const char *start, size_t len)
 {
 	t_token	*token;

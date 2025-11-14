@@ -33,7 +33,9 @@ BUILTINS := ./src/builtins
 
 # files
 SRC = src/lexer.c src/lexer_utils.c src/parser.c\
- 	$(EXEC)/exec_simple.c $(EXEC)/paths.c $(EXEC)/redirs.c $(EXEC)/pipeline.c\
+ 	$(EXEC)/exec_simple.c $(EXEC)/paths.c $(EXEC)/redirs.c\
+	$(EXEC)/pipeline.c $(EXEC)/pipe_utils.c $(EXEC)/cleanup_shell.c\
+	$(EXEC)/expand_vars.c $(EXEC)/handle_err.c $(EXEC)/signal_handler.c\
 	$(BUILTINS)/builtin_main.c $(BUILTINS)/builtin_echo.c\
 	$(BUILTINS)/builtin_cd.c $(BUILTINS)/builtin_export.c\
 	$(BUILTINS)/builtin_unset.c $(BUILTINS)/builtin_env.c\

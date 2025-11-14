@@ -1,238 +1,102 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pipeline.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/05 11:54:04 by ssukhija          #+#    #+#             */
+/*   Updated: 2025/11/05 11:54:04 by ssukhija         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../includes/minishell.h"
+///////////////////////////////
+static int malloc_fail_at = -1;  // set to the Nth call you want to fail
+static int malloc_count = 0;
 
-static void cleanup_pipes(int **pipes, int cmd_count)
-{
-    if (!pipes)
-        return;
-    for (int i = 0; i < cmd_count - 1; i++)
-    {
-        if (pipes[i])
-        {
-            close(pipes[i][0]);
-            close(pipes[i][1]);
-            free(pipes[i]);
-        }
-    }
-    free(pipes);
-}
-
-static void cleanup_pipes_array(t_pipe_data *data)
-{
-    int i;
-
-    i = 0;
-    if (!data->pipes)
-        return;
-    while (i < data->cmd_count - 1)
-    {
-        if (data->pipes[i])
-        {
-            close(data->pipes[i][0]);
-            close(data->pipes[i][1]);
-            free(data->pipes[i]);
-        }
-        i++;
-    }
-    free(data->pipes);
-}
-
-
-static int handle_error(const char *msg, pid_t *pids, t_pipe_data *data)
-{
-    if (pids)
-        free(pids);
-    if (data->pipes)
-        cleanup_pipes_array(data);
-
-    perror(msg);
-    return (1);
-}
-
-
-// =========================== CREATE PIPES ===========================
-
-//static int **create_pipes(int cmd_count)
-static int **create_pipes(t_pipe_data *data)
-{
-    int **pipes;
-
-    if (data->cmd_count < 2)
-        return NULL;
-
-    pipes = malloc(sizeof(int *) * (data->cmd_count - 1));
-    if (!pipes)
-    {
-        perror("malloc pipes");
+void *test_malloc(size_t size) {
+    malloc_count++;
+    printf("malloc : %d\n",malloc_count);
+    if (malloc_fail_at > 0 && malloc_count == malloc_fail_at) {
         return NULL;
     }
-
-    for (int i = 0; i < data->cmd_count - 1; i++)
-    {
-        pipes[i] = malloc(sizeof(int) * 2);
-        if (!pipes[i])
-        {
-            perror("malloc pipe pair");
-            cleanup_pipes(pipes, i);
-            return NULL;
-        }
-        if (pipe(pipes[i]) == -1)
-        {
-            perror("pipe creation failed");
-            cleanup_pipes(pipes, i + 1);
-            return NULL;
-        }
-    }
-
-    return (pipes);
+    return malloc(size);
 }
 
-// =========================== CHILD PROCESS ===========================
-// (cmd, pipes, i, cmd_count, envp, env_list);
-//static void child_process(t_cmd *cmd, int **pipes, int i, int cmd_count, char **envp, t_env **env_list)
-static void child_process(t_pipe_data *data, t_cmd *cmd, char **envp)
+static int fork_fail_at = -1;  // set to the Nth call you want to fail
+static int fork_count = 0;
+
+pid_t test_fork(void) {
+    fork_count++;
+    if (fork_fail_at > 0 && fork_count == fork_fail_at) {
+        return -1;  // simulate fork failure
+    }
+    return fork();
+}
+////////////////////////////////////////////////////////////////////////
+
+static int	count_cmds(t_cmd *cmd_list)
 {
-    char *path;
-    int tty_fd;
-    //int i;
+	t_cmd	*cmd;
+	int		count;
 
-    // --- SETUP PIPE CONNECTIONS ---
-    //i = 0;
-    if (data->i > 0)
-        dup2(data->pipes[data->i - 1][0], STDIN_FILENO);
-    if (data->i < data->cmd_count - 1)
-        dup2(data->pipes[data->i][1], STDOUT_FILENO);
-
-        //
-    
-
-    if (data->i < data->cmd_count - 1) // not last command
-    {
-        tty_fd = open("/dev/tty", O_WRONLY);
-        if (tty_fd >= 0)
-        {
-            dup2(tty_fd, STDERR_FILENO);
-            close(tty_fd);
-        }
-    }
-//
-    // --- CLOSE ALL PIPES ---
-    for (int j = 0; j < data->cmd_count - 1; j++)
-    {
-        close(data->pipes[j][0]);
-        close(data->pipes[j][1]);
-    }
-
-    // --- APPLY REDIRECTIONS ---
-    if (apply_redirs(cmd) == -1)
-        exit(1);
-
-    // --- BUILTIN OR EXEC ---
-    if (is_builtin(cmd->argv[0]))
-        exit(exec_builtin(cmd, data->env_list));
-
-    path = find_exec(cmd->argv[0], envp);
-    if (!path && !is_builtin(cmd->argv[0]))
-    {
-        write(STDERR_FILENO, cmd->argv[0], ft_strlen(cmd->argv[0]));
-        write(STDERR_FILENO, ": command not found\n", 20);
-        exit(127);
-    }
-
-    execve(path, cmd->argv, envp);
-    perror("execve failed");
-    free(path);
-    exit(127);
+	count = 0;
+	cmd = cmd_list;
+	while (cmd)
+	{
+		count++;
+		cmd = cmd->next;
+	}
+	return (count);
 }
 
-// =========================== COUNT CMDS ===========================
-
-static int  count_cmds(t_cmd *cmd_list)
+static int	close_wait(t_pipe_data *data, pid_t *pids)
 {
-    int     count;
-    t_cmd   *cmd;
+	int	i;
+	int	status;
 
-    count = 0;
-    cmd = cmd_list;
-    while (cmd)
-    {
-        count++;
-        cmd = cmd->next;
-    }
-    return (count);
+	i = 0;
+	status = 0;
+	while (i < data->cmd_count)
+	{
+		if (waitpid(pids[i], &status, 0) == -1)
+			perror("waitpid");
+		i++;
+	}
+	return (status);
 }
 
-static void close_parent_pipes(t_pipe_data *data)
+void    *handle_ptr_err(const char *msg, int code)
 {
-    int **pipes = data->pipes; 
-    int cmd_count = data->cmd_count;
-    int i;
-
-    
-    i = 0;
-    while (i < cmd_count - 1)
-    {
-        close(pipes[i][0]);
-        close(pipes[i][1]);
-        i++;
-    }
-}
-
-//static int    close_wait(int cmd_count, pid_t *pids)
-static int    close_wait(t_pipe_data *data, pid_t *pids)
-{
-    int i;
-    int status;
-    int cmd_count = data->cmd_count;
-
-    i = 0;
-    status = 0;
-    while (i < cmd_count)
-    {
-        if (waitpid(pids[i], &status, 0) == -1)
-            perror("waitpid");
-        i++;
-    }
-    return (status);
+    if (msg)
+        perror(msg);
+    g_exit_code = code;
+    return (NULL);
 }
 
 static int	*create_pids(t_cmd *cmd_list, t_pipe_data *data, char **envp)
 {
-	//int		i = data->i;
 	t_cmd	*cmd;
 	pid_t	*pids;
-    //int cmd_count = data->cmd_count;
-    //int **pipes = data->pipes;
 
 	pids = malloc(sizeof(pid_t) * data->cmd_count);
 	if (!pids)
-	{	//return ((pid_t *)handle_error("malloc failed", NULL, pipes, cmd_count));
-        perror("eRROR\n");
-        exit(1);
-    }
-	//i = 0;
+	    return (handle_ptr_err("malloc", 1));
 	cmd = cmd_list;
 	while (data->i < data->cmd_count)
 	{
 		pids[data->i] = fork();
 		if (pids[data->i] == -1)
-		{
-            perror("eRROR\n");
-            exit(1);
-        //return ((pid_t *)handle_error("fork failed", pids, pipes, cmd_count));
-        }
+            return (handle_ptr_err("fork", 1));
 		if (pids[data->i] == 0)
-		{
 			child_process(data, cmd, envp);
-			return (NULL);
-		}
 		cmd = cmd->next;
 		data->i++;
 	}
 	return (pids);
 }
 
-
-//int	execute_pipeline(t_cmd *cmd_list, char **envp, t_env **env_list)
 static int	execute_pipeline(t_pipe_data *data, t_cmd *cmd_list, char **envp)
 {
 	pid_t	*pids;
@@ -240,33 +104,32 @@ static int	execute_pipeline(t_pipe_data *data, t_cmd *cmd_list, char **envp)
     
 	data->pipes = create_pipes(data);
 	if (!data->pipes && data->cmd_count > 1)
-		return (handle_error("minishell: failed to create pipes", NULL, NULL));
+        return (1);
 	pids = create_pids(cmd_list, data, envp);
 	if (!pids)
-		return (handle_error("Error: failed to create pids", pids, data));
-    
+		return (1);
 	close_parent_pipes(data);
 	status = close_wait(data, pids);
 	free(pids);
-    cleanup_pipes_array(data);
 	return (status);
 }
 
-//static void    init_pipe_data(t_pipe_data *data, int cmd_count, int **pipes, t_env **env_list)
 int    init_pipe_data(t_cmd *cmd_list, char **envp, t_env **env_list)
 {
     t_pipe_data *data;
-    int         ret;
+    int         status;
 
     data = malloc(sizeof(t_pipe_data));
+    if (!data)
+        return (1);
     data->cmd_count = count_cmds(cmd_list);
-	if (data->cmd_count == 0)  // prob need to free data before return
+	if (data->cmd_count == 0)
 		return (1);
     data->i = 0;
     data->pipes = NULL;
     data->env_list = env_list;
-    ret = execute_pipeline(data, cmd_list, envp);
-    return (WEXITSTATUS(ret));
+    status = execute_pipeline(data, cmd_list, envp);
+    free_pipe_data(data);
+    g_exit_code = extract_exit_code(status);
+    return (g_exit_code);
 }
-
-

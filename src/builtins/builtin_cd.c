@@ -6,50 +6,73 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 10:44:47 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/10/18 10:47:47 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/13 10:04:20 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
+int	print_cd_error(const char *target, int err_code)
+{
+	if (err_code == 1)
+	{
+		write(2, "minishell: cd: HOME not set", 27);
+	}
+	else if (err_code == 2)
+	{
+		write(2, "minishell: cd: OLDPWD not set", 29);
+	}
+	else if (err_code == 3)
+	{
+		write(2, "minishell: cd: ", 15);
+		write(2, target, ft_strlen(target));
+		write(2, ": No such file or directory\n", 28);
+	}
+	else if (err_code == 4)
+	{
+		write(2, "minishell: cd: ", 15);
+		write(2, target, ft_strlen(target));
+		write(2, ": Not a directory\n", 18);
+	}
+	else
+		perror("minishell: cd");
+	return (1);
+}
+
 int	builtin_cd(t_cmd *cmd, t_env **env_list)
 {
-	char	*target;
-	char	*oldpwd;
-	char	cwd[1024];
+	char *target;
+	char *oldpwd;
+	char cwd[1024];
+	struct stat sb;
 
 	oldpwd = get_env_value(*env_list, "PWD");
 	if (!cmd->argv[1] || ft_strcmp(cmd->argv[1], "~") == 0)
 	{
 		target = get_env_value(*env_list, "HOME");
 		if (!target)
-		{
-			perror("minishell: cd: HOME not set");
-			return (1);
-		}
+			return (print_cd_error(NULL, 1));
 	}
 	else if (cmd->argv[1] && ft_strcmp(cmd->argv[1], "-") == 0)
 	{
 		target = get_env_value(*env_list, "OLDPWD");
 		if (!target)
-		{
-			perror("minishell: cd: OLDPWD not set");
-			return (1);
-		}
+			return (print_cd_error(NULL, 2));
 	}
 	else
 		target = cmd->argv[1];
+	if (stat(target, &sb) == 0)
+	{
+		if (!S_ISDIR(sb.st_mode))
+			return (print_cd_error(target, 4)); // Not a directory
+	}
+	else
+		return (print_cd_error(target, 3));
 	if (chdir(target) == -1)
-	{
-		perror("minishell: cd");
-		return (1);
-	}
+		return (print_cd_error(target, 3));
 	if (getcwd(cwd, sizeof(cwd)) == NULL)
-	{
-		perror("minishell: cd");
-		return (1);
-	}
-	set_env(env_list, "OLDPWD", oldpwd);// Store previous PWD into OLDPWD
-	set_env(env_list, "PWD", cwd);// Update PWD to new directory
+		return (print_cd_error(NULL, 0));
+	set_env(env_list, "OLDPWD", oldpwd); // Store previous PWD into OLDPWD
+	set_env(env_list, "PWD", cwd);       // Update PWD to new directory
 	return (0);
 }

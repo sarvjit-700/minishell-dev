@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 00:55:32 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/10/09 22:39:45 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/13 10:28:22 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,30 +22,6 @@ void	free_redir(t_redir *rdr)
 		free(rdr->filename);
 		free(rdr);
 		rdr = tmp;
-	}
-}
-
-void	free_cmd_list(t_cmd *cmd)
-{
-	t_cmd	*tmp_cmd;
-	int		i;
-
-	while (cmd)
-	{
-		tmp_cmd = cmd->next;
-		if (cmd->argv)
-		{
-			i = 0;
-			while (i < cmd->argc)
-			{
-				free(cmd->argv[i]);
-				i++;
-			}
-			free(cmd->argv);
-		}
-		free_redir(cmd->redir);
-		free(cmd);
-		cmd = tmp_cmd;
 	}
 }
 
@@ -165,13 +141,22 @@ static int	is_redir_token(t_token_type type)
 		|| type == TOKEN_APPEND || type == TOKEN_HEREDOC);
 }
 
+static int	handle_parser_err(const char *msg)
+{
+	write(2, msg, ft_strlen(msg));
+	g_exit_code = 2;
+	return (0);
+}
+
 static int	handle_pipe(t_parser_state *ps)
 {
-	if (ps->curr == NULL)
-		return (0);
-	if (ps->token->next == NULL || ps->token->next->type == TOKEN_PIPE
+	const char *msg = "minishell: syntax error near unexpected token `|'\n";
+	if (ps->curr == NULL || ps->token->next == NULL
+		|| ps->token->next->type == TOKEN_PIPE
 		|| is_redir_token(ps->token->next->type))
-		return (0);
+	{
+		return (handle_parser_err(msg));
+	}
 	ps->curr = NULL;
 	return (1);
 }
@@ -179,14 +164,15 @@ static int	handle_pipe(t_parser_state *ps)
 static int	handle_redir(t_parser_state *ps)
 {
 	t_token	*file_token;
+	const char *msg = "minishell: syntax error near unexpected token `newline'\n";
 
 	if (!start_cmd(ps))
-		return (0);
+		return (handle_parser_err(msg));
 	file_token = ps->token->next;
 	if (file_token == NULL || file_token->type != TOKEN_WORD)
-		return (0);
+		return (handle_parser_err(msg));
 	if (!add_redir(ps->curr, ps->token->type, file_token->value))
-		return (0);
+		return (handle_parser_err(msg));
 	ps->token = file_token;
 	return (1);
 }
