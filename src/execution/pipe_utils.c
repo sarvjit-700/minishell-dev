@@ -94,8 +94,9 @@ static void	exec_child(t_pipe_data *data, t_cmd *cmd, char **envp)
 
 void	child_process(t_pipe_data *data, t_cmd *cmd, char **envp)
 {
-	signal(SIGINT, SIG_DFL);
-    signal(SIGQUIT, SIG_DFL);
+	setup_signal_handlers(2);
+	// signal(SIGINT, SIG_DFL);
+    // signal(SIGQUIT, SIG_DFL);
 	if (data->i > 0)
 		dup2(data->pipes[data->i - 1][0], STDIN_FILENO);
 	if (data->i < data->cmd_count - 1)

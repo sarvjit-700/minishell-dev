@@ -13,7 +13,8 @@
 #include "../includes/minishell.h"
 int	g_exit_code = 0;
 
-int execute_command(t_cmd *cmd, char **envp, t_env **env_list)
+//int execute_command(t_cmd *cmd, char **envp, t_env **env_list)
+int execute_command(t_shell *shell, t_cmd *cmd, char **envp)
 {
     char *path;
     pid_t pid;
@@ -37,7 +38,7 @@ int execute_command(t_cmd *cmd, char **envp, t_env **env_list)
             close(save_stdout);
             return (1);
 		}
-        g_exit_code = exec_builtin(cmd, env_list);
+        g_exit_code = exec_builtin(cmd, &shell->env_list);
 		dup2(save_stdin, STDIN_FILENO);
         dup2(save_stdout, STDOUT_FILENO);
         close(save_stdin);
@@ -60,14 +61,15 @@ int execute_command(t_cmd *cmd, char **envp, t_env **env_list)
 	}
 	if (pid == 0)
     {
-		signal(SIGINT, SIG_DFL);
-        signal(SIGQUIT, SIG_DFL);
+		setup_signal_handlers(2);
+		// signal(SIGINT, SIG_DFL);
+        // signal(SIGQUIT, SIG_DFL);
 		if (apply_redirs(cmd) == -1)
 			exit(1);
 		if (is_builtin(cmd->argv[0]))
 		{
 			free(path);
-			exit(exec_builtin(cmd, env_list));
+			exit(exec_builtin(cmd, &shell->env_list));
 		}
 		execve(path, cmd->argv, envp);
 		handle_exec_error(path, 0);
@@ -79,16 +81,32 @@ int execute_command(t_cmd *cmd, char **envp, t_env **env_list)
     return (1);
 }
 
-int execute(t_cmd *cmd_list, char **envp, t_env **env_list)
+// int execute(t_cmd *cmd_list, char **envp, t_env **env_list)
+// {
+// 	if (!cmd_list)
+// 		return (0);
+//     if (process_heredocs(cmd_list) == -1)
+//         return (g_exit_code);
+//     if (cmd_list->next)
+//         return (init_pipe_data(cmd_list, envp, env_list));
+//     else
+//         return (execute_command(cmd_list, envp, env_list));
+// }
+
+int execute(t_shell *shell, char **envp)
 {
+	t_cmd	*cmd_list;
+
+	cmd_list = shell->cmd_list;
+	
 	if (!cmd_list)
 		return (0);
     if (process_heredocs(cmd_list) == -1)
         return (g_exit_code);
     if (cmd_list->next)
-        return (init_pipe_data(cmd_list, envp, env_list));
+        return (init_pipe_data(shell->cmd_list, envp, &shell->env_list));
     else
-        return (execute_command(cmd_list, envp, env_list));
+        return (execute_command(shell, cmd_list, envp));
 }
 
 void	free_env(t_env *env)
@@ -141,7 +159,6 @@ t_env	*env_init(char **envp)
 	return (head);
 }
 
-
 int init_shell(t_shell *shell, char **envp)
 {
     shell->env_list = env_init(envp);
@@ -158,16 +175,93 @@ int init_shell(t_shell *shell, char **envp)
     return (0);
 }
 
-#define COLOUR   "\001\033[33m\002"
-#define RESET   "\001\033[0m\002"
+static t_status	parse_input(t_shell *shell)
+{
+	shell->cmd_list = parse_tokens(shell->tokens);
+	if (!shell->cmd_list) 
+	{
+		free_tokens(shell->tokens);
+		free(shell->line);
+		return (LOOP_CONTINUE);
+	}
+	return (LOOP_OK);
+}
+
+static t_status	tokenize_input(t_shell *shell)
+{	
+	const char *input;  
+
+	input = shell->line;              // ✅ make a const char* copy
+	shell->tokens = tokenize(&input); // ✅ pass pointer to pointer
+	if (!shell->tokens) 
+	{
+		free(shell->line);
+		return (LOOP_CONTINUE);
+	}
+	return (LOOP_OK);
+}
+
+static t_status read_input(t_shell *shell)
+{
+	char *prompt = COLOUR "minishell$ " RESET;
+	int len;
+
+	setup_signal_handlers(0);
+	if (isatty(STDIN_FILENO))
+		shell->line = readline(prompt);
+	else
+	{
+		shell->line = get_next_line(STDIN_FILENO);
+		if (!shell->line)
+			return (LOOP_BREAK);
+		len = ft_strlen(shell->line);
+		if (len > 0 && shell->line[len - 1] == '\n')
+			shell->line[len - 1] = '\0';
+	}
+	if (!shell->line)
+	{
+		if (isatty(STDIN_FILENO))
+			ft_putstr_fd("exit\n", STDOUT_FILENO);
+		return (LOOP_BREAK);
+	}
+	if (*shell->line)
+		add_history(shell->line);
+	else 
+	{
+		free(shell->line);
+		return (LOOP_CONTINUE);
+	}
+	return (LOOP_OK);
+}
+
+void	run_shell(t_shell *shell, char **envp)
+{
+	t_status	status;
+	t_redir 	*r;
+
+	while (shell->running)
+	{
+		status = read_input(shell);
+		if (status == LOOP_BREAK) break;
+		if (status == LOOP_CONTINUE) continue;
+		status = tokenize_input(shell);
+		if (status == LOOP_CONTINUE) continue;
+		status = parse_input(shell);
+		if (status == LOOP_CONTINUE) continue;
+			r = shell->cmd_list->redir;
+		while (r)
+			r = r->next;
+		expand_vars(shell);
+		setup_signal_handlers(1);
+		//execute(shell->cmd_list, envp, &shell->env_list);
+		execute(shell, envp);
+		cleanup_simple(shell);
+	}
+}
 
 int	main(int argc, char **argv, char **envp)
 {
-	char *prompt = COLOUR "minishell$ " RESET;
 	t_shell	*shell;
-	t_redir *r;
-	int len;
-	const char *input;   // note: const because tokenize takes const char **
 
 	(void)argc;
 	(void)argv;
@@ -179,65 +273,7 @@ int	main(int argc, char **argv, char **envp)
 	}
 	if (init_shell(shell, envp))
 		return (1);
-	while (shell->running)
-	{
-		//if (isatty(STDIN_FILENO))
-		setup_signal_handlers();
-
-		if (isatty(STDIN_FILENO))
-			//shell->line = readline("minishell$ ");
-			shell->line = readline(prompt);
-		else
-		{
-			shell->line = get_next_line(STDIN_FILENO);
-			if (!shell->line)
-				break;
-			// Remove trailing newline for consistency with readline()
-			len = ft_strlen(shell->line);
-			if (len > 0 && shell->line[len - 1] == '\n')
-				shell->line[len - 1] = '\0';
-		}
-		if (!shell->line) // Ctrl+D or EOF
-		{
-			if (isatty(STDIN_FILENO))
-				ft_putstr_fd("exit\n", STDOUT_FILENO);
-			break;
-		}
-
-		if (*shell->line) // only add non-empty lines
-			add_history(shell->line);
-		else 
-			{
-				free(shell->line);
-				continue;
-			}
-
-		input = shell->line;              // ✅ make a const char* copy
-		shell->tokens = tokenize(&input); // ✅ pass pointer to pointer
-		if (!shell->tokens) 
-		{
-			free(shell->line);
-			continue;
-		}
-		shell->cmd_list = parse_tokens(shell->tokens);
-		if (!shell->cmd_list) 
-		{
-			free_tokens(shell->tokens);
-			free(shell->line);
-			continue;
-		}
-		r = shell->cmd_list->redir;
-		while (r)
-		{
-			r = r->next;
-		}
-		expand_vars(shell);
-		signal(SIGINT, SIG_IGN);
-		signal(SIGQUIT, SIG_IGN);
-		if (shell->cmd_list)   //probably don't need this if just execute
-			execute(shell->cmd_list, envp, &shell->env_list);
-		cleanup_simple(shell);
-	}
+	run_shell(shell, envp);
 	cleanup_shell(shell);
 	return (0);
 }

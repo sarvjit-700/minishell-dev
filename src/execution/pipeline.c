@@ -115,6 +115,7 @@ static int	execute_pipeline(t_pipe_data *data, t_cmd *cmd_list, char **envp)
 }
 
 int    init_pipe_data(t_cmd *cmd_list, char **envp, t_env **env_list)
+//int init_pipe_data(shell->cmd_list, envp, &shell->env_list)
 {
     t_pipe_data *data;
     int         status;

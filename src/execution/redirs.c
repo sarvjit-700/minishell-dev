@@ -141,8 +141,9 @@ int create_heredoc(const char *delimiter)
     {
         char *line;
 
-        signal(SIGINT, SIG_DFL);     // child responds to Ctrl-C
-        signal(SIGQUIT, SIG_DFL);
+        setup_signal_handlers(2);
+        // signal(SIGINT, SIG_DFL);     // child responds to Ctrl-C
+        // signal(SIGQUIT, SIG_DFL);
         close(pipefd[0]);            // child writes only
 
         while (1)

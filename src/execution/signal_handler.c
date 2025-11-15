@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-void sigint_handler(int sig)
+static void sigint_handler(int sig)
 {
     (void)sig;
 
@@ -27,7 +27,7 @@ void sigint_handler(int sig)
     }
 }
 
-void sigquit_handler(int sig)
+static void sigquit_handler(int sig)
 {
     (void)sig;
     // Do nothing when at prompt
@@ -36,8 +36,21 @@ void sigquit_handler(int sig)
     rl_redisplay();
 }
 
-void setup_signal_handlers(void)
+void setup_signal_handlers(int sig_type)
 {
-    signal(SIGINT, sigint_handler);
-    signal(SIGQUIT, sigquit_handler);
+    if (sig_type == 1)
+    {
+        signal(SIGINT, SIG_IGN);
+		signal(SIGQUIT, SIG_IGN);
+    }
+    else if (sig_type == 2)
+    {
+        signal(SIGINT, SIG_DFL);
+		signal(SIGQUIT, SIG_DFL);
+    }
+    else
+    {
+        signal(SIGINT, sigint_handler);
+        signal(SIGQUIT, sigquit_handler);
+    }
 }

@@ -12,6 +12,8 @@
 
 #ifndef MINISHELL_H
 # define MINISHELL_H
+# define COLOUR   "\001\033[33m\002"
+# define RESET   "\001\033[0m\002"
 
 # include "../libft/libft.h"
 # include <stdlib.h>
@@ -75,6 +77,15 @@ typedef struct s_parser_state
 }   t_parser_state;
 
 // -- For Execution --//
+
+typedef enum e_status 
+{
+    LOOP_OK,
+    LOOP_CONTINUE,
+    LOOP_BREAK,
+    LOOP_ERROR
+}   t_status;
+
 
 typedef struct s_env
 {
@@ -168,6 +179,7 @@ int builtin_exit(t_cmd *cmd);
 // -- PIPEX -- //
 //int execute_pipeline(t_cmd *cmd_list, char **envp, t_env **env_list);
 int    init_pipe_data(t_cmd *cmd_list, char **envp, t_env **env_list);
+//int    init_pipe_data(t_shell *shell, char **envp);
 
 void    *handle_ptr_err(const char *msg, int code); //move 
 
@@ -186,9 +198,9 @@ int extract_exit_code(int status); //move later
 
 
 // -- Signal Handler -- //
-void sigint_handler(int sig);
-void sigquit_handler(int sig);
-void setup_signal_handlers(void);
+// void sigint_handler(int sig);
+// void sigquit_handler(int sig);
+void setup_signal_handlers(int sig_type);
 
 // -- Expand Vars -- //
 void    expand_vars(t_shell *shell);
