@@ -12,13 +12,13 @@
 
 #include "../includes/minishell.h"
 
-static int handle_heredoc_stub(const char *delimiter)
-{
-    (void)delimiter;
-    errno = EINVAL;
-//    printf("HEREDOC\n");
-    return (-1);
-}
+// static int handle_heredoc_stub(const char *delimiter)
+// {
+//     (void)delimiter;
+//     errno = EINVAL;
+// //    printf("HEREDOC\n");
+//     return (-1);
+// }
 
 static int redir_in(t_redir *r)
 {
@@ -66,20 +66,21 @@ static int redir_out_append(t_redir *r, int x)
 
 static int redir_heredoc(t_redir *r)
 {
-    int fd;
-
-    fd = handle_heredoc_stub(r->filename);
-    if (fd == -1)
+    if (r->fd == -1)
         return (-1);
-    if (dup2(fd, STDIN_FILENO) == -1)
+
+    if (dup2(r->fd, STDIN_FILENO) == -1)
     {
         perror("dup2");
-        close(fd);
+        close(r->fd);
         return (-1);
     }
-    close(fd);
+
+    close(r->fd);
+    r->fd = -1;
     return (0);
 }
+
 
 int apply_redirs(t_cmd *cmd)
 {
@@ -109,6 +110,98 @@ int apply_redirs(t_cmd *cmd)
         if (ret == -1)
             return (-1);
         r = r->next;
+    }
+    return (0);
+}
+
+int create_heredoc(const char *delimiter)
+{
+    int     pipefd[2];
+    pid_t   pid;
+    int     status;
+
+    if (pipe(pipefd) == -1)
+    {
+        perror("pipe");
+        g_exit_code = 1;
+        return (-1);
+    }
+
+    pid = fork();
+    if (pid == -1)
+    {
+        perror("fork");
+        g_exit_code = 1;
+        close(pipefd[0]);
+        close(pipefd[1]);
+        return (-1);
+    }
+
+    if (pid == 0)
+    {
+        char *line;
+
+        signal(SIGINT, SIG_DFL);     // child responds to Ctrl-C
+        signal(SIGQUIT, SIG_DFL);
+        close(pipefd[0]);            // child writes only
+
+        while (1)
+        {
+            line = readline("> ");
+            if (!line)
+                exit(0);
+
+            if (ft_strcmp(line, delimiter) == 0)
+            {
+                free(line);
+                exit(0);
+            }
+
+            write(pipefd[1], line, ft_strlen(line));
+            write(pipefd[1], "\n", 1);
+            free(line);
+        }
+    }
+
+    // ---- parent ----
+    close(pipefd[1]);                // parent only reads
+    waitpid(pid, &status, 0);
+
+    g_exit_code = extract_exit_code(status);
+    if (g_exit_code == 130)
+    {
+        close(pipefd[0]);
+        return (-1);
+    }
+    return pipefd[0];   // read-end of heredoc data
+}
+
+
+
+int process_heredocs(t_cmd *cmd_list)
+{
+    t_cmd *cmd;
+    t_redir *r;
+
+    cmd = cmd_list;
+    while (cmd)
+    {
+        r = cmd->redir;
+        while (r)
+        {
+            if (r->type == TOKEN_HEREDOC)
+            {
+                r->fd = create_heredoc(r->filename); // filename = delimiter
+                if (r->fd == -1)
+                {
+                    if (g_exit_code != 130)
+                        g_exit_code = 1;
+                    return (-1);
+                }
+            }
+            r = r->next;
+        }
+        cmd = cmd->next;
     }
     return (0);
 }

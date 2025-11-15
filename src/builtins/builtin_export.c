@@ -3,14 +3,30 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_export.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msimek <msimek@student.42.fr>              +#+  +:+       +#+        */
+/*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 11:44:03 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/04 08:20:55 by msimek           ###   ########.fr       */
+/*   Updated: 2025/11/14 21:00:28 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
+int	is_valid_var(char *var)
+{
+	int	i;
+
+	if (!var || (!ft_isalpha(var[0]) && var[0] != '_'))
+		return (0);
+	i = 1;
+	while (var[i] != '\0')
+	{
+		if (!ft_isalnum(var[i]) && var[i] != '_')
+			return (0);
+		i++;
+	}
+	return (1);
+}
 
 void	print_exported_vars(t_env *env_list)
 {

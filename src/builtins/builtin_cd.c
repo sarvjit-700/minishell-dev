@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 10:44:47 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/13 10:04:20 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/14 18:18:37 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,12 @@ int	print_cd_error(const char *target, int err_code)
 		write(2, "minishell: cd: ", 15);
 		write(2, target, ft_strlen(target));
 		write(2, ": Not a directory\n", 18);
+	}
+	else if (err_code == 5)
+	{
+		write(2, "minishell: cd: ", 15);
+		write(2, target, ft_strlen(target));
+		write(2, ": Permission denied\n", 20);
 	}
 	else
 		perror("minishell: cd");
@@ -61,18 +67,22 @@ int	builtin_cd(t_cmd *cmd, t_env **env_list)
 	}
 	else
 		target = cmd->argv[1];
-	if (stat(target, &sb) == 0)
-	{
-		if (!S_ISDIR(sb.st_mode))
-			return (print_cd_error(target, 4)); // Not a directory
-	}
-	else
+	if (stat(target, &sb) == -1)
 		return (print_cd_error(target, 3));
+	if (!S_ISDIR(sb.st_mode))
+		return (print_cd_error(target, 4));
+	if (access(target, X_OK) == -1)
+		return (print_cd_error(target, 5));
 	if (chdir(target) == -1)
-		return (print_cd_error(target, 3));
+		return (print_cd_error(target, 5));
 	if (getcwd(cwd, sizeof(cwd)) == NULL)
 		return (print_cd_error(NULL, 0));
 	set_env(env_list, "OLDPWD", oldpwd); // Store previous PWD into OLDPWD
 	set_env(env_list, "PWD", cwd);       // Update PWD to new directory
+	if (cmd->argv[1] && ft_strcmp(cmd->argv[1], "-") == 0)
+	{
+		write(1, cwd, ft_strlen(cwd));
+		write(1, "\n", 1);
+	}
 	return (0);
 }

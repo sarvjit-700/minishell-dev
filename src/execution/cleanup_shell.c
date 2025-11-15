@@ -12,19 +12,6 @@
 
 #include "minishell.h"
 
-// static void free_cmd_args(char **argv)
-// {
-//     int i = 0;
-//     if (!argv)
-//         return;
-//     while (argv[i])
-//     {
-//         free(argv[i]);
-//         i++;
-//     }
-//     free(argv);
-// }
-
 
 int extract_exit_code(int status)
 {
@@ -37,18 +24,6 @@ int extract_exit_code(int status)
         write(1, "\n", 1);
     return (128 + sig);
 }
-
-// int extract_exit_code(int status)
-// {
-//     if ((status & 0x7F) == 0)
-//         return (status >> 8);
-//     if ((status & 0x7F) != 0)
-//     {
-//         write(1, "\n", 1);
-//         return (128 + (status & 0x7F));
-//     }
-//     return (1);
-// }
 
 static void cleanup_pipes(int **pipes, int cmd_count)
 {
@@ -77,6 +52,19 @@ void free_pipe_data(t_pipe_data *data)
     cleanup_pipes(data->pipes, data->cmd_count);
     data->pipes = NULL;
     free(data);
+}
+
+void	free_redir(t_redir *rdr)
+{
+	t_redir	*tmp;
+
+	while (rdr)
+	{
+		tmp = rdr->next;
+		free(rdr->filename);
+		free(rdr);
+		rdr = tmp;
+	}
 }
 
 void	free_cmd_list(t_cmd *cmd)

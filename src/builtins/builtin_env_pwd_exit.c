@@ -1,16 +1,40 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   builtin_exit.c                                     :+:      :+:    :+:   */
+/*   builtin_env_pwd_exit.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/10/18 14:20:58 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/14 08:47:15 by ssukhija         ###   ########.fr       */
+/*   Created: 2025/10/18 13:48:32 by ssukhija          #+#    #+#             */
+/*   Updated: 2025/11/14 21:05:12 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
+int	builtin_env(t_env *env_list)
+{
+	while (env_list)
+	{
+		if (env_list->exported && env_list->value)
+			printf("%s=%s\n", env_list->key, env_list->value);
+		env_list = env_list->next;
+	}
+	return (0);
+}
+
+int	builtin_pwd(void)
+{
+	char	cwd[1024];
+
+	if (getcwd(cwd, sizeof(cwd)) == NULL)
+	{
+		perror("minishell: pwd");
+		return (1);
+	}
+	printf("%s\n", cwd);
+	return (0);
+}
 
 static int	is_num(const char *str)
 {
@@ -35,7 +59,7 @@ int	builtin_exit(t_cmd *cmd)
 	int	exit_code;
 
 	if (isatty(STDIN_FILENO))
-    	printf("exit\n");
+		printf("exit\n");
 	exit_code = 0;
 	if (!cmd->argv[1])
 		exit(0);

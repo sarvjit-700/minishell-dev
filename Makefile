@@ -28,23 +28,23 @@ RM = rm -rf
 # paths
 LIBFT_DIR	:= ./libft
 LIBFT	:= $(LIBFT_DIR)/libft.a
+PREP	:= ./src/prep
 EXEC	:= ./src/execution
 BUILTINS := ./src/builtins
 
 # files
-SRC = src/lexer.c src/lexer_utils.c src/parser.c\
+SRC = $(PREP)/lexer_main.c $(PREP)/lexer_utils.c $(PREP)/tokenizer.c\
+	$(PREP)/lexer_quoted.c $(PREP)/parser_main.c $(PREP)/parse_pipe_redir.c $(PREP)/parse_word.c\
  	$(EXEC)/exec_simple.c $(EXEC)/paths.c $(EXEC)/redirs.c\
 	$(EXEC)/pipeline.c $(EXEC)/pipe_utils.c $(EXEC)/cleanup_shell.c\
 	$(EXEC)/expand_vars.c $(EXEC)/handle_err.c $(EXEC)/signal_handler.c\
-	$(BUILTINS)/builtin_main.c $(BUILTINS)/builtin_echo.c\
+	$(BUILTINS)/builtin_main.c $(BUILTINS)/builtin_echo_unset.c\
 	$(BUILTINS)/builtin_cd.c $(BUILTINS)/builtin_export.c\
-	$(BUILTINS)/builtin_unset.c $(BUILTINS)/builtin_env.c\
-	$(BUILTINS)/builtin_exit.c $(BUILTINS)/builtin_pwd.c
+	$(BUILTINS)/builtin_env_pwd_exit.c
 OBJ = $(SRC:.c=.o)
 
 INCLUDES = -Iincludes -I$(LIBFT_DIR)
 LDFLAGS = -lreadline
-
 
 # rules
 all: $(LIBFT) $(NAME)

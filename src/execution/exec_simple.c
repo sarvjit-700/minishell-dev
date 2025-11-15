@@ -65,7 +65,10 @@ int execute_command(t_cmd *cmd, char **envp, t_env **env_list)
 		if (apply_redirs(cmd) == -1)
 			exit(1);
 		if (is_builtin(cmd->argv[0]))
+		{
+			free(path);
 			exit(exec_builtin(cmd, env_list));
+		}
 		execve(path, cmd->argv, envp);
 		handle_exec_error(path, 0);
 		exit(127);
@@ -80,7 +83,8 @@ int execute(t_cmd *cmd_list, char **envp, t_env **env_list)
 {
 	if (!cmd_list)
 		return (0);
-
+    if (process_heredocs(cmd_list) == -1)
+        return (g_exit_code);
     if (cmd_list->next)
         return (init_pipe_data(cmd_list, envp, env_list));
     else
