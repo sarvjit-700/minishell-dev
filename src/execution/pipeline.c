@@ -6,35 +6,11 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/05 11:54:04 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/05 11:54:04 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/18 10:57:17 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
-///////////////////////////////
-static int malloc_fail_at = -1;  // set to the Nth call you want to fail
-static int malloc_count = 0;
-
-void *test_malloc(size_t size) {
-    malloc_count++;
-    printf("malloc : %d\n",malloc_count);
-    if (malloc_fail_at > 0 && malloc_count == malloc_fail_at) {
-        return NULL;
-    }
-    return malloc(size);
-}
-
-static int fork_fail_at = -1;  // set to the Nth call you want to fail
-static int fork_count = 0;
-
-pid_t test_fork(void) {
-    fork_count++;
-    if (fork_fail_at > 0 && fork_count == fork_fail_at) {
-        return -1;  // simulate fork failure
-    }
-    return fork();
-}
-////////////////////////////////////////////////////////////////////////
+#include "minishell.h"
 
 static int	count_cmds(t_cmd *cmd_list)
 {
@@ -67,14 +43,6 @@ static int	close_wait(t_pipe_data *data, pid_t *pids)
 	return (status);
 }
 
-void    *handle_ptr_err(const char *msg, int code)
-{
-    if (msg)
-        perror(msg);
-    g_exit_code = code;
-    return (NULL);
-}
-
 static int	*create_pids(t_cmd *cmd_list, t_pipe_data *data, char **envp)
 {
 	t_cmd	*cmd;
@@ -82,13 +50,13 @@ static int	*create_pids(t_cmd *cmd_list, t_pipe_data *data, char **envp)
 
 	pids = malloc(sizeof(pid_t) * data->cmd_count);
 	if (!pids)
-	    return (handle_ptr_err("malloc", 1));
+		return (handle_ptr_err("malloc", 1));
 	cmd = cmd_list;
 	while (data->i < data->cmd_count)
 	{
 		pids[data->i] = fork();
 		if (pids[data->i] == -1)
-            return (handle_ptr_err("fork", 1));
+			return (handle_ptr_err("fork", 1));
 		if (pids[data->i] == 0)
 			child_process(data, cmd, envp);
 		cmd = cmd->next;
@@ -101,10 +69,10 @@ static int	execute_pipeline(t_pipe_data *data, t_cmd *cmd_list, char **envp)
 {
 	pid_t	*pids;
 	int		status;
-    
+
 	data->pipes = create_pipes(data);
 	if (!data->pipes && data->cmd_count > 1)
-        return (1);
+		return (1);
 	pids = create_pids(cmd_list, data, envp);
 	if (!pids)
 		return (1);
@@ -114,23 +82,22 @@ static int	execute_pipeline(t_pipe_data *data, t_cmd *cmd_list, char **envp)
 	return (status);
 }
 
-int    init_pipe_data(t_cmd *cmd_list, char **envp, t_env **env_list)
-//int init_pipe_data(shell->cmd_list, envp, &shell->env_list)
+int	init_pipe_data(t_cmd *cmd_list, char **envp, t_env **env_list)
 {
-    t_pipe_data *data;
-    int         status;
+	t_pipe_data	*data;
+	int			status;
 
-    data = malloc(sizeof(t_pipe_data));
-    if (!data)
-        return (1);
-    data->cmd_count = count_cmds(cmd_list);
+	data = malloc(sizeof(t_pipe_data));
+	if (!data)
+		return (1);
+	data->cmd_count = count_cmds(cmd_list);
 	if (data->cmd_count == 0)
 		return (1);
-    data->i = 0;
-    data->pipes = NULL;
-    data->env_list = env_list;
-    status = execute_pipeline(data, cmd_list, envp);
-    free_pipe_data(data);
-    g_exit_code = extract_exit_code(status);
-    return (g_exit_code);
+	data->i = 0;
+	data->pipes = NULL;
+	data->env_list = env_list;
+	status = execute_pipeline(data, cmd_list, envp);
+	free_pipe_data(data);
+	g_exit_code = extract_exit_code(status);
+	return (g_exit_code);
 }

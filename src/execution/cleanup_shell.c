@@ -12,7 +12,6 @@
 
 #include "minishell.h"
 
-
 int extract_exit_code(int status)
 {
     int sig;
@@ -90,6 +89,23 @@ void	free_cmd_list(t_cmd *cmd)
 		cmd = tmp_cmd;
 	}
 }
+/*
+void	free_env(t_env *env)
+{
+	t_env	*tmp;
+
+	while (env)
+	{
+		tmp = env->next;
+		if (env->key)
+			free(env->key);
+		if (env->value)
+			free(env->value);
+		free(env);
+		env = tmp;
+	}
+}
+    */
 
 static void free_env_list(t_env *env)
 {

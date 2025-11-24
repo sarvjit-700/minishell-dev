@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 10:56:19 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/14 21:06:30 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/20 10:00:39 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,13 +40,13 @@ int	builtin_echo(char **argv)
 	}
 	while (argv[i])
 	{
-		printf("%s", argv[i]);
+		write(1, argv[i], ft_strlen(argv[i]));
 		if (argv[i + 1])
-			printf(" ");
+			write(1," ", 1);
 		i++;
 	}
-	if (n_flag != 1)
-		printf("\n");
+	if (!n_flag)
+		write(1, "\n", 1);
 	return (0);
 }
 

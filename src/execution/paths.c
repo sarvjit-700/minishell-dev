@@ -6,13 +6,13 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/28 13:36:34 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/07/28 13:54:43 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/18 10:48:26 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "minishell.h"
 
-void	free_parts(char **arr, char *cmd_path, int x)
+static void	free_parts(char **arr, char *cmd_path, int x)
 {
 	int	i;
 
@@ -29,7 +29,7 @@ void	free_parts(char **arr, char *cmd_path, int x)
 	free(arr);
 }
 
-char	*get_env_path(char **envp)
+static char	*get_env_path(char **envp)
 {
 	while (*envp)
 	{
@@ -40,17 +40,17 @@ char	*get_env_path(char **envp)
 	return (NULL);
 }
 
-static char *direct_path (char *cmd)
+static char	*direct_path(char *cmd)
 {
-    if (access(cmd, X_OK) == 0)
-        return (ft_strdup(cmd));
-    return (NULL);
+	if (access(cmd, X_OK) == 0)
+		return (ft_strdup(cmd));
+	return (NULL);
 }
 
-char	*search_in_paths(char **paths, char *cmd)
+static char	*search_in_paths(char **paths, char *cmd)
 {
 	char	*tmp;
-    char    *full_path;
+	char	*full_path;
 	int		i;
 
 	i = 0;
@@ -67,7 +67,7 @@ char	*search_in_paths(char **paths, char *cmd)
 		free(full_path);
 		i++;
 	}
-    free_parts(paths, "none", 0);
+	free_parts(paths, "none", 0);
 	return (NULL);
 }
 
@@ -77,11 +77,11 @@ char	*find_exec(char *cmd, char **envp)
 	char	**paths;
 	char	*full_path;
 
-    if (cmd == NULL || !*cmd)
-        return (NULL);
-    if (ft_strchr(cmd, '/'))
-        return (direct_path(cmd));
-    full_path = NULL;
+	if (cmd == NULL || !*cmd)
+		return (NULL);
+	if (ft_strchr(cmd, '/'))
+		return (direct_path(cmd));
+	full_path = NULL;
 	env_path = get_env_path(envp);
 	if (env_path == NULL)
 		return (NULL);

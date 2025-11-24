@@ -6,22 +6,18 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 13:56:52 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/15 10:35:51 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/20 16:47:07 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-char	*ft_strndup(const char *s, size_t n)
+char *append_char(char *dst, char c)
 {
-	char	*copy;
-
-	copy = malloc(sizeof(char) * (n + 1));
-	if (!copy)
-		return (NULL);
-	ft_memcpy(copy, s, n);
-	copy[n] = '\0';
-	return (copy);
+    char	buf[1];
+	
+    buf[0] = c;
+    return (append_str(dst, buf, 1));
 }
 
 bool	is_whitespace(char c)

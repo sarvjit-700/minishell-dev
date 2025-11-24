@@ -19,10 +19,7 @@ static t_cmd	*new_command(void)
 	new_cmd = malloc(sizeof(t_cmd));
 	if (new_cmd == NULL)
 		return (NULL);
-	new_cmd->argv = NULL;
-	new_cmd->argc = 0;
-	new_cmd->redir = NULL;
-	new_cmd->next = NULL;
+	memset(new_cmd, 0, sizeof(t_cmd));
 	return (new_cmd);
 }
 
@@ -72,6 +69,7 @@ int	start_cmd(t_parser_state *ps)
 	}
 	return (1);
 }
+
 
 int	handle_word(t_parser_state *ps)
 {

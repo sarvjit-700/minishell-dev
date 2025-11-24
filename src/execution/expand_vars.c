@@ -5,176 +5,390 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/10 12:04:29 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/10 12:04:29 by ssukhija         ###   ########.fr       */
+/*   Created: 2025/11/19 19:35:19 by ssukhija          #+#    #+#             */
+/*   Updated: 2025/11/19 19:35:19 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-/* Split an expanded argv into multiple arguments if it contains spaces */
+/* ============================ BASIC UTILITIES ============================= */
 
-void cmd_append_argv(t_cmd *cmd, char **words, int start)
+static char	*dup_env_value(t_env *env, const char *key)
 {
-    int i, old_len, new_len;
-    char **new_argv;
+	char	*val;
 
-    old_len = 0;
-    while (cmd->argv && cmd->argv[old_len])
-        old_len++;
+	val = get_env_value(env, key);
+	if (!val)
+		return (ft_strdup(""));
+	return (ft_strdup(val));
+}
 
-    new_len = old_len;
-    for (i = start; words[i]; i++)
-        new_len++;
+static char	*expand_var(char *dst, char *src)
+{
+	char	*tmp;
 
-    new_argv = malloc(sizeof(char *) * (new_len + 1));
-    if (!new_argv)
-        return;
+	if (!dst)
+		dst = ft_strdup("");
+	if (!src)
+		src = ft_strdup("");
+	tmp = ft_strjoin(dst, src);
+	free(dst);
+	return (tmp);
+}
 
-    // copy old argv
-    for (i = 0; i < old_len; i++)
-        new_argv[i] = cmd->argv[i];
+static char	*expand_char(char *dst, char c)
+{
+	char buf[2];
 
-    // copy new words
-    int j = old_len;
-    for (i = start; words[i]; i++)
-        new_argv[j++] = words[i];
+	buf[0] = c;
+	buf[1] = '\0';
+	return (expand_var(dst, buf));
+}
 
-    new_argv[j] = NULL;
+/* ============================ STRING EXPANSION ============================ */
 
-    free(cmd->argv);
-    cmd->argv = new_argv;
+static int	is_valid_start(char c)
+{
+	return (ft_isalpha(c) || c == '_');
+}
+
+static char	*expand_dollar(char *str, int *i, t_shell *shell, char *res)
+{
+	char	*tmp;
+	char	*var;
+	int		start;
+
+	if (str[*i + 1] == '?')
+	{
+		tmp = ft_itoa(g_exit_code);
+		res = expand_var(res, tmp);
+		free(tmp);
+		*i += 2;
+		return (res);
+	}
+	if (is_valid_start(str[*i + 1]))
+	{
+		(*i)++;
+		start = *i;
+		while (ft_isalnum(str[*i]) || str[*i] == '_')
+			(*i)++;
+		var = ft_substr(str, start, *i - start);
+		tmp = dup_env_value(shell->env_list, var);
+		res = expand_var(res, tmp);
+		free(var);
+		free(tmp);
+		return (res);
+	}
+	res = expand_char(res, '$');
+	(*i)++;
+	return (res);
+}
+
+static char	*remove_markers(const char *s)
+{
+	char	*clean;
+	int		i;
+	int		j;
+
+	clean = malloc(ft_strlen(s) + 1);
+	if (!clean)
+		return (NULL);
+	i = 0;
+	j = 0;
+	while (s[i])
+	{
+		if (s[i] == S_QM_S || s[i] == S_QM_E
+		|| s[i] == D_QM_S || s[i] == D_QM_E)
+		{
+			i++;
+			continue;
+		}
+		clean[j++] = s[i++];
+	}
+	clean[j] = '\0';
+	return (clean);
+}
+
+static char	*expand_string(char *str, t_shell *shell)
+{
+	char	*res;
+	int		i;
+
+	res = ft_strdup("");
+	if (!res)
+		return (NULL);
+	i = 0;
+	while (str[i])
+	{
+		if (str[i] == S_QM_S)
+		{
+			i++;
+			while (str[i] && str[i] != S_QM_E)
+			{
+				res = expand_char(res, str[i]);
+				i++;
+			}
+			if (str[i] == S_QM_E)
+				i++;
+		}
+		else if (str[i] == '\\')
+		{
+			i++;
+			if (str[i])
+				res = expand_char(res, str[i++]);
+		}
+		else if (str[i] == '$')
+			res = expand_dollar(str, &i, shell, res);
+		else
+		{
+			res = expand_char(res, str[i]);
+			i++;
+		}
+		if (!res)
+			return (NULL);
+	}
+	return (res);
+}
+
+/* ======================== REUSABLE WORD PROCESSOR ========================= */
+
+static int	process_expanded_words(char **words, char **dst, int idx, t_mode mode)
+{
+	int	i;
+
+	i = 0;
+	while (words && words[i])
+	{
+		if (mode == MODE_FILL)
+		{
+			dst[idx] = ft_strdup(words[i]);
+			if (!dst[idx])
+				return (-1);
+		}
+		idx++;
+		i++;
+	}
+	return (idx);
 }
 
 
-static char *expand_var(char *s1, char *s2)
+static void	free_words(char **w)
 {
-    char *res;
+	int	i;
 
-    if (!s1 || !s2)
+	i = 0;
+	while (w && w[i])
+	{
+		free(w[i]);
+		i++;
+	}
+	free(w);
+}
+
+/*
+static char **expand_and_split(const char *input, t_shell *shell)
+{
+    char    *expanded;
+    char    **words;
+
+    if (!input)
         return (NULL);
-    res = ft_strjoin(s1, s2);
-    free(s1);
-    return (res);
-}
 
-static char *expand_char(char *s, char c)
-{
-    char *tmp;
-    char str[2];
-
-    str[0] = c;
-    str[1] = '\0';
-    tmp = expand_var(s, str);
-    return (tmp);
-}
-
-static char *get_exitcode_str()
-{
-    //printf("getting exit code\n");
-    return (ft_itoa(g_exit_code));
-}
-
-static char *dup_env_value(t_env *env_list, const char *key)
-{
-    char *val;
-
-    val = get_env_value(env_list, key);
-    if (!val)
-        return (ft_strdup(""));
-    return (ft_strdup(val));
-}
-
-static char *expand_string(char *str, t_shell *shell)
-{
-    //(void)shell;
-    int     i;
-    int     start;
-    char    *res;
-    char    *tmp;
-    char    *var;
-   // char    *old;
-
-    i = 0;
-    res = ft_strdup("");
-    while (str[i])
+    expanded = expand_string((char *)input, shell);
+    if (!expanded)
+		return (NULL);
+    if (ft_strchr(expanded, S_QM_S) || ft_strchr(expanded, D_QM_S))
     {
-        if (str[i] == '$')
+        words = ft_calloc(2, sizeof(char *));
+        if (!words)
         {
-            if (str[i + 1] == '?')
-            {
-                tmp = get_exitcode_str();
-                res = expand_var(res, tmp);
-                free(tmp);
-                i += 2;
-            }
-            else if (ft_isalpha(str[i + 1]) || str[i + 1] == '_')
-            {
-                i++;
-                start = i;
-                while (ft_isalnum(str[i]) || str[i] == '_')
-                    i++;
-                var = ft_substr(str, start, i - start);
-                tmp = dup_env_value(shell->env_list, var);
-                res = expand_var(res, tmp);
-                free(tmp);
-                free(var);
-            }
-            else
-            {
-                // literal $
-                res = expand_char(res, str[i++]);
-            }
+            free(expanded);
+            return (NULL);
         }
-        else
-            res = expand_char(res, str[i++]);
+        words[0] = remove_markers(expanded);
+        free(expanded);
+        return (words);
     }
-    return (res);
+	if (expanded[0] == '\0')
+	{
+		words = malloc(sizeof(char*) * 2);
+		if (!words)
+		{
+			free(expanded);
+			return NULL;
+		}
+		words[0] = ft_strdup("");
+		words[1] = NULL;
+		free(expanded);
+		return words;
+	}
+    words = ft_split(expanded, ' ');
+    free(expanded);
+    return (words);
+}
+	*/
+static char **expand_and_split(const char *input, t_shell *shell)
+{
+    char *expanded;
+    char **words;
+
+    if (!input)
+        return NULL;
+
+    expanded = expand_string((char *)input, shell);
+    if (!expanded)
+        return NULL;
+
+    if (ft_strchr(expanded, S_QM_S) || ft_strchr(expanded, D_QM_S))
+    {
+        words = ft_calloc(2, sizeof(char *));
+        if (!words)
+        {
+            free(expanded);
+            return NULL;
+        }
+        words[0] = remove_markers(expanded);
+        free(expanded);
+        return words;
+    }
+
+    words = ft_split(expanded, ' ');
+    free(expanded);
+    return words;
 }
 
-void    expand_vars(t_shell *shell)
+
+
+/* =========================== COUNTING PASS ================================ */
+
+static int	count_expanded_argv(t_cmd *cmd, t_shell *shell)
 {
-    t_cmd   *cmd;
-    t_redir *redir;
-    char    *tmp;
-    int     i;
+	int		i;
+	int		count;
+	char	**words;
 
-    cmd = shell->cmd_list;
-    while (cmd)
-    {
-        i = 0;
-        while (cmd->argv && cmd->argv[i])
-        {
-        if (ft_strchr(cmd->argv[i], '$'))
-        {
-            tmp = expand_string(cmd->argv[i], shell); // expand $VAR
-            free(cmd->argv[i]);
+	i = 0;
+	count = 0;
+	while (cmd->argv[i])
+	{
+        words = expand_and_split(cmd->argv[i], shell);
+		if (!words)
+			return (-1);
+		count = process_expanded_words(words, NULL, count, MODE_COUNT);
+		free_words(words);
+		i++;
+	}
+	return (count);
+}
 
-            // Split on spaces
-            char **words = ft_split(tmp, ' ');
-            free(tmp);
+/* ========================== FILLING PASS ================================= */
 
-            if (words)
-            {
-                cmd->argv[i] = words[0];            // replace original with first word
-                cmd_append_argv(cmd, words, 1);     // append remaining words to argv
-                free(words);                         // free array container (not the strings)
-            }
-        }
+static int	fill_expanded_argv(t_cmd *cmd, t_shell *shell, char **new_argv)
+{
+	int		i;
+	int		idx;
+	char	**words;
 
-            i++;
-        }
-        redir = cmd->redir;
-        while (redir)
-        {
-            if (ft_strchr(redir->filename, '$'))
-            {
-                tmp = expand_string(redir->filename, shell);
-                free(redir->filename);
-                redir->filename = tmp;
-            }
-            redir = redir->next;
-        }
-        cmd = cmd->next;
-    }
+	i = 0;
+	idx = 0;
+	while (cmd->argv[i])
+	{
+		words = expand_and_split(cmd->argv[i], shell);
+		if (!words)
+			return (-1);
+		idx = process_expanded_words(words, new_argv, idx, MODE_FILL);
+		free_words(words);
+		if (idx == -1)
+			return (-1);
+		i++;
+	}
+	new_argv[idx] = NULL;
+	return (idx);
+}
+
+static void	free_argv(char **argv)
+{
+	int	i;
+
+	i = 0;
+	while (argv && argv[i])
+	{
+		free(argv[i]);
+		i++;
+	}
+	free(argv);
+}
+
+static void	expand_cmd_argv(t_cmd *cmd, t_shell *shell)
+{
+	int		final_count;
+	char	**new_argv;
+
+	final_count = count_expanded_argv(cmd, shell);
+	if (final_count <= 0)
+		return ;
+	new_argv = malloc(sizeof(char *) * (final_count + 1));
+	if (!new_argv)
+		return ;
+	if (fill_expanded_argv(cmd, shell, new_argv) == -1)
+	{
+		free_argv(new_argv);
+		return ;
+	}
+	free_argv(cmd->argv);
+	cmd->argv = new_argv;
+	cmd->argc = final_count;
+}
+
+/* ============================ REDIRECTION ================================= */
+
+static int	expand_redirs(t_cmd *cmd, t_shell *shell)
+{
+	t_redir	*r;
+	char	*tmp;
+
+	r = cmd->redir;
+	while (r)
+	{
+		if (ft_strchr(r->filename, '$'))
+		{
+			tmp = expand_string(r->filename, shell);
+			if (tmp)
+			{
+				if (tmp[0] == '\0' || ft_strchr(tmp, ' '))
+				{
+					ft_putstr_fd("minishell: ", 2);
+					ft_putstr_fd(r->filename, 2);
+					ft_putstr_fd(": ambiguous redirect\n", 2);
+					g_exit_code = 1;
+					cmd->redir_error = 1;
+					free(tmp);
+					return (-1);
+				}
+				else
+				{
+					free(r->filename);
+					r->filename = tmp;
+				}
+			}
+		}
+		r = r->next;
+	}
+	return (0);
+}
+
+/* ============================ PUBLIC ENTRY ================================ */
+
+void	expand_vars(t_shell *shell)
+{
+	t_cmd	*cmd;
+
+	cmd = shell->cmd_list;
+	while (cmd)
+	{
+		expand_cmd_argv(cmd, shell);
+		expand_redirs(cmd, shell);
+		cmd = cmd->next;
+	}
 }

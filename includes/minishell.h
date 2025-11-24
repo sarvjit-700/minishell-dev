@@ -14,6 +14,10 @@
 # define MINISHELL_H
 # define COLOUR   "\001\033[33m\002"
 # define RESET   "\001\033[0m\002"
+# define S_QM_S '\x01'   // start of quoted segment  
+# define S_QM_E '\x02'   // end of quoted segment
+# define D_QM_S '\x03'   // start of quoted segment  
+# define D_QM_E '\x04'   // end of quoted segment
 
 # include "../libft/libft.h"
 # include <stdlib.h>
@@ -55,7 +59,6 @@ typedef struct s_redir
 {
     t_token_type type;            // e.g. TOKEN_REDIR_IN, TOKEN_REDIR_OUT, TOKEN_APPEND, TOKEN_HEREDOC
     char *filename;
-    int quoted;
     int fd;
     struct s_redir *next;
 } t_redir;
@@ -64,6 +67,7 @@ typedef struct s_cmd
 {
     char **argv;                  // NULL-terminated argv array
     int argc;
+    int redir_error;
     t_redir *redir;         // linked list of redirections for this command
     struct s_cmd *next;       // next command in pipeline
 } t_cmd;
@@ -114,6 +118,14 @@ typedef struct s_shell
 	int       running;
 }	t_shell;
 
+// -- For Expansion -- //
+typedef enum e_mode
+{
+    MODE_COUNT,
+    MODE_FILL
+}   t_mode;
+
+
 
 // -- Lexer -- // -- SORTED
 // -- tokenizer -- //
@@ -128,14 +140,14 @@ t_token	*extract_words(const char **input);
 char	*append_quoted(const char **input, char *words);
 
 // lexer-utils //
-char *ft_strndup(const char *s, size_t n);
+char *append_char(char *dst, char c);
 bool is_whitespace(char c);
 bool is_op_start(char c);
 t_token *create_token(t_token_type type, const char *start, size_t len);
 void add_token(t_token **head, t_token *new);
 
 
-// -- PARSER -- //
+// -- PARSER -- // -- SORTED
 // -- parser main -- //
 int	handle_parser_err(const char *msg);
 t_cmd   *parse_tokens(t_token *tokens);
@@ -147,14 +159,53 @@ int	process_token(t_parser_state *ps);
 int	start_cmd(t_parser_state *ps);
 int	handle_word(t_parser_state *ps);
 
+// -- EXECUTION -- //
+// -- executor --// -- sorted
+int	execute(t_shell *shell, char **envp);
 
-// -- execution --//
+// -- exec_cmd -- // -- sorted
+int	execute_command(t_shell *shell, t_cmd *cmd, char **envp);
+
+// -- shell level -- //
+void    adjust_shlvl(t_env **env_list);
+
+// -- run_shell -- // -- sorted
+void	run_shell(t_shell *shell, char **envp);
+
+// -- paths -- // -- sorted
 char	*find_exec(char *cmd, char **envp);
 
+// -- PIPELINE -- // --SORTED
+int    init_pipe_data(t_cmd *cmd_list, char **envp, t_env **env_list);
+
+// -- pipe_utils --// -- sorted
+int	**create_pipes(t_pipe_data *data);
+void	close_parent_pipes(t_pipe_data *data);
+void	child_process(t_pipe_data *data, t_cmd *cmd, char **envp);
+
+// -- redirs -- // NEED TO SORT
 int apply_redirs(t_cmd *cmd);
 int process_heredocs(t_cmd *cmd_list); // move later
 
-// -- BUILTINS -- // -- SORTED
+// -- CLEANUP -- //
+void free_pipe_data(t_pipe_data *data);
+void cleanup_simple(t_shell *shell);
+void cleanup_shell(t_shell *shell);
+void	free_cmd_list(t_cmd *cmd);
+void    free_tokens(t_token *token); // move later
+int extract_exit_code(int status); //move later
+
+// -- Signal Handler -- // -- sorted
+void setup_signal_handlers(int sig_type);
+
+// -- Expand Vars -- // NEED TO SORT
+void    expand_vars(t_shell *shell);
+
+// -- Handle Error -- //
+void    *handle_ptr_err(const char *msg, int code);
+void handle_exec_error(const char *path, int child);
+
+// -- BUILTINS -- //
 // -- main -- //
 int is_builtin(const char *cmd);
 int	exec_builtin(t_cmd *cmd, t_env **env_list);
@@ -162,7 +213,7 @@ char *get_env_value(t_env *env_list, const char *key);
 void set_env(t_env **env_list, const char *key, const char *value);
 
 // -- builtins cd export -- //
-int builtin_cd(t_cmd *cmd, t_env **env_list);
+int builtin_cd(t_cmd *cmd, t_env **env_list); //need to break down
 int builtin_export(t_cmd *cmd, t_env **env_list);
 
 // -- builtin echo, unset -- //
@@ -173,40 +224,5 @@ int builtin_unset(t_cmd *cmd, t_env **env_list);
 int builtin_env(t_env *env_list);
 int builtin_pwd(void);
 int builtin_exit(t_cmd *cmd);
-
-
-
-// -- PIPEX -- //
-//int execute_pipeline(t_cmd *cmd_list, char **envp, t_env **env_list);
-int    init_pipe_data(t_cmd *cmd_list, char **envp, t_env **env_list);
-//int    init_pipe_data(t_shell *shell, char **envp);
-
-void    *handle_ptr_err(const char *msg, int code); //move 
-
-// -- PIPE_UTILS --//
-int	**create_pipes(t_pipe_data *data);
-void	close_parent_pipes(t_pipe_data *data);
-void	child_process(t_pipe_data *data, t_cmd *cmd, char **envp);
-
-// -- CLEANUP -- //
-void free_pipe_data(t_pipe_data *data);
-void cleanup_simple(t_shell *shell);
-void cleanup_shell(t_shell *shell);
-void	free_cmd_list(t_cmd *cmd);
-void    free_tokens(t_token *token); // move later
-int extract_exit_code(int status); //move later
-
-
-// -- Signal Handler -- //
-// void sigint_handler(int sig);
-// void sigquit_handler(int sig);
-void setup_signal_handlers(int sig_type);
-
-// -- Expand Vars -- //
-void    expand_vars(t_shell *shell);
-
-// -- Handle Error -- //
-//void handle_exec_error(char *cmd);
-void handle_exec_error(const char *path, int child);
 
 #endif

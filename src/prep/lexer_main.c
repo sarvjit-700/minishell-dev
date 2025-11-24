@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 13:28:59 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/15 10:35:13 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/24 10:19:55 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,9 @@ t_token	*extract_words(const char **input)
 	while (**input && !is_whitespace(**input) && !is_op_start(**input))
 	{
 		if (**input == '\'' || **input == '"')
+		{
 			words = append_quoted(input, words);
+		}
 		else
 			words = append_plain(input, words);
 		if (words == NULL)

@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/15 08:22:02 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/15 08:44:42 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/21 08:36:32 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,9 @@ static char	*handle_esc_char(const char **input, char *words)
 static char	*handle_double_quote(const char **input, char *words)
 {
 	(*input)++;
+	words = append_char(words, D_QM_S);
+    if (!words)
+		return (NULL);
 	while (**input && **input != '"')
 	{
 		if (**input == '\\')
@@ -60,6 +63,8 @@ static char	*handle_double_quote(const char **input, char *words)
 	}
 	if (**input != '"')
 	{
+		g_exit_code = 2;
+		write(2, "minishell: syntax error: unclosed quote\n", 41);
 		free(words);
 		return (NULL);
 	}
@@ -69,6 +74,9 @@ static char	*handle_double_quote(const char **input, char *words)
 		if (words == NULL)
 			return (NULL);
 	}
+	words = append_char(words, D_QM_E);
+    if (!words)
+		return (NULL);
 	(*input)++;
 	return (words);
 }
@@ -78,17 +86,25 @@ static char	*handle_single_quote(const char **input, char *words)
 	const char	*start;
 
 	(*input)++;
+	words = append_char(words, S_QM_S);
+    if (!words)
+		return (NULL);
 	start = *input;
 	while (**input && **input != '\'')
 		(*input)++;
 	if (**input == '\0')
 	{
+		g_exit_code = 2;
+		write(2, "minishell: syntax error: unclosed quote\n", 41);
 		free(words);
 		return (NULL);
 	}
 	words = append_str(words, start, *input - start);
 	if (words == NULL)
 		return (NULL);
+	words = append_char(words, S_QM_E);
+    if (!words)
+		return (NULL);	
 	(*input)++;
 	return (words);
 }

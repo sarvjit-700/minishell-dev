@@ -6,11 +6,19 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 20:50:52 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/11 20:50:52 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/18 10:53:11 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+void	*handle_ptr_err(const char *msg, int code)
+{
+	if (msg)
+		perror(msg);
+	g_exit_code = code;
+	return (NULL);
+}
 
 static void	set_exit(int type, int child)
 {
