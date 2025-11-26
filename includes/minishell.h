@@ -116,6 +116,7 @@ typedef struct s_shell
 	char     *line;
 	int       last_status;
 	int       running;
+    int       should_exit;
 }	t_shell;
 
 // -- For Expansion -- //
@@ -168,6 +169,7 @@ int	execute_command(t_shell *shell, t_cmd *cmd, char **envp);
 
 // -- shell level -- //
 void    adjust_shlvl(t_env **env_list);
+int    add_new_shell(t_env *parent);
 
 // -- run_shell -- // -- sorted
 void	run_shell(t_shell *shell, char **envp);
@@ -192,23 +194,38 @@ void free_pipe_data(t_pipe_data *data);
 void cleanup_simple(t_shell *shell);
 void cleanup_shell(t_shell *shell);
 void	free_cmd_list(t_cmd *cmd);
+void free_env_list(t_env *env);
+void    free_env_array(char **envp);
 void    free_tokens(t_token *token); // move later
 int extract_exit_code(int status); //move later
 
 // -- Signal Handler -- // -- sorted
 void setup_signal_handlers(int sig_type);
 
+// -- EXPANSION -- //
 // -- Expand Vars -- // NEED TO SORT
-void    expand_vars(t_shell *shell);
+void    expand_variables(t_shell *shell);
+
+// -- expand utils -- //
+char	*expand_var(char *dst, char *src);
+char	*remove_markers(const char *s);
+void	free_words(char **w);
+void	free_argv(char **argv);
+int process_expanded(char **words, char **dst, int idx, t_mode mode);
+
+// -- expand string -- //
+char	*expand_string(char *str, t_shell *shell);
+int	expand_redirs(t_cmd *cmd, t_shell *shell);
+char	*expand_dollar(char *str, int *i, t_shell *shell, char *res);
 
 // -- Handle Error -- //
 void    *handle_ptr_err(const char *msg, int code);
-void handle_exec_error(const char *path, int child);
+void    handle_exec_error(const char *path, int child);
 
 // -- BUILTINS -- //
 // -- main -- //
 int is_builtin(const char *cmd);
-int	exec_builtin(t_cmd *cmd, t_env **env_list);
+int	exec_builtin(t_cmd *cmd, t_shell *shell, t_env **env_list);
 char *get_env_value(t_env *env_list, const char *key);
 void set_env(t_env **env_list, const char *key, const char *value);
 
@@ -223,6 +240,6 @@ int builtin_unset(t_cmd *cmd, t_env **env_list);
 // -- builtin env, pwd, exit -- //
 int builtin_env(t_env *env_list);
 int builtin_pwd(void);
-int builtin_exit(t_cmd *cmd);
+int builtin_exit(t_cmd *cmd, t_shell *shell);
 
 #endif

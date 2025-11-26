@@ -6,11 +6,11 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 10:46:41 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/18 16:03:01 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/25 21:30:36 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "minishell.h"
 
 int	is_builtin(const char *cmd)
 {
@@ -27,7 +27,7 @@ int	is_builtin(const char *cmd)
 		|| !ft_strcmp(cmd, "exit"));
 }
 
-int	exec_builtin(t_cmd *cmd, t_env **env_list)
+int	exec_builtin(t_cmd *cmd, t_shell *shell, t_env **env_list)
 {
 	if (!cmd->argv || !cmd->argv[0])
 		return (0);
@@ -44,7 +44,7 @@ int	exec_builtin(t_cmd *cmd, t_env **env_list)
 	if (ft_strncmp(cmd->argv[0], "env", 4) == 0)
 		return (builtin_env(*env_list));
 	if (ft_strncmp(cmd->argv[0], "exit", 5) == 0)
-		return (builtin_exit(cmd));
+		return (builtin_exit(cmd, shell));
 	return (0);
 }
 

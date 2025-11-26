@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/07 09:58:31 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/07 09:58:31 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/25 09:42:53 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ static void	exec_child(t_pipe_data *data, t_cmd *cmd, char **envp)
 	if (apply_redirs(cmd) == -1)
 		exit(1);
 	if (is_builtin(cmd->argv[0]))
-		exit(exec_builtin(cmd, data->env_list));
+		exit(exec_builtin(cmd, NULL, data->env_list));
 	path = find_exec(cmd->argv[0], envp);
 	if (!path && !is_builtin(cmd->argv[0]))
 	{

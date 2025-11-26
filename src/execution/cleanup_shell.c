@@ -13,16 +13,29 @@
 #include "minishell.h"
 
 int extract_exit_code(int status)
-{
+ {
     int sig;
-    
+    int core;
+
     sig = status & 0x7F;
+    core = status & 0x80;
     if (sig == 0)
         return (status >> 8);
-    if (sig == SIGINT || sig == SIGQUIT)
+    if (sig == SIGINT)
+    {
         write(1, "\n", 1);
+        return (128 + sig);
+    }
+    if (sig == SIGQUIT)
+    {
+        if (core)
+            write(2, "Quit (core dumped)\n", 20);
+        else
+            write(1, "\n", 1);
+        return (128 + sig);
+    }
     return (128 + sig);
-}
+ }
 
 static void cleanup_pipes(int **pipes, int cmd_count)
 {
@@ -107,7 +120,7 @@ void	free_env(t_env *env)
 }
     */
 
-static void free_env_list(t_env *env)
+void free_env_list(t_env *env)
 {
     t_env *tmp;
 
@@ -120,6 +133,18 @@ static void free_env_list(t_env *env)
         env = tmp;
     }
 }
+
+void    free_env_array(char **envp)
+{
+    int i = 0;
+    while (envp[i])
+    {
+        free(envp[i]);
+        i++;
+    }
+    free(envp);
+}
+
 
 void    free_tokens(t_token *token)
 {

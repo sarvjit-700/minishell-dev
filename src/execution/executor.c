@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/10 23:35:17 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/24 11:36:01 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/25 10:21:59 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ static int	init_shell(t_shell *shell, char **envp)
 		perror("minishell");
 		return (1);
 	}
-	adjust_shlvl(&(shell->env_list));
+	adjust_shlvl(&shell->env_list);
 	shell->tokens = NULL;
 	shell->cmd_list = NULL;
 	shell->line = NULL;
@@ -107,5 +107,5 @@ int	main(int argc, char **argv, char **envp)
 		return (1);
 	run_shell(shell, envp);
 	cleanup_shell(shell);
-	return (0);
+	exit(g_exit_code);
 }

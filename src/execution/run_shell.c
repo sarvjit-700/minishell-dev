@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 09:51:11 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/18 10:45:23 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/26 08:55:09 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ void	run_shell(t_shell *shell, char **envp)
 		r = shell->cmd_list->redir;
 		while (r)
 			r = r->next;
-		expand_vars(shell);
+		expand_variables(shell);
 		setup_signal_handlers(1);
 		execute(shell, envp);
 		cleanup_simple(shell);

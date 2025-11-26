@@ -28,7 +28,7 @@ static int	run_builtin(t_shell *shell, t_cmd *cmd)
 		close(save_stdout);
 		return (1);
 	}
-	exit_code = exec_builtin(cmd, &shell->env_list);
+	exit_code = exec_builtin(cmd, shell, &shell->env_list);//was &shell->env_list
 	dup2(save_stdin, STDIN_FILENO);
 	dup2(save_stdout, STDOUT_FILENO);
 	close(save_stdin);
@@ -44,7 +44,7 @@ static void	run_exec_child(t_shell *shell, t_cmd *cmd, char *path, char **envp)
 	if (is_builtin(cmd->argv[0]))
 	{
 		free(path);
-		exit(exec_builtin(cmd, &shell->env_list));
+		exit(exec_builtin(cmd, shell, &shell->env_list));
 	}
 	execve(path, cmd->argv, envp);
 	handle_exec_error(cmd->argv[0], 0);
@@ -74,6 +74,7 @@ static int	spawn_child(t_shell *shell, t_cmd *cmd, char *path, char **envp)
 int	execute_command(t_shell *shell, t_cmd *cmd, char **envp)
 {
 	char	*path;
+	int		status;
 
 	if (cmd->redir_error)
 		return (g_exit_code);
@@ -84,6 +85,13 @@ int	execute_command(t_shell *shell, t_cmd *cmd, char **envp)
 		g_exit_code = run_builtin(shell, cmd);
 		return (g_exit_code);
 	}
+	if (ft_strcmp(cmd->argv[0], "./minishell") == 0)
+    {
+        status = add_new_shell(shell->env_list);
+		shell->last_status = status; 
+        g_exit_code = status;
+        return (status);
+    }
 	path = find_exec(cmd->argv[0], envp);
 	if (!path)
 	{

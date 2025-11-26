@@ -30,14 +30,17 @@ LIBFT_DIR	:= ./libft
 LIBFT	:= $(LIBFT_DIR)/libft.a
 PREP	:= ./src/prep
 EXEC	:= ./src/execution
+XPAND	:= ./src/expansion
 BUILTINS := ./src/builtins
 
 # files
 SRC = $(PREP)/lexer_main.c $(PREP)/lexer_utils.c $(PREP)/tokenizer.c\
 	$(PREP)/lexer_quoted.c $(PREP)/parser_main.c $(PREP)/parse_pipe_redir.c $(PREP)/parse_word.c\
  	$(EXEC)/executor.c $(EXEC)/exec_cmd.c $(EXEC)/run_shell.c $(EXEC)/paths.c $(EXEC)/redirs.c\
-	$(EXEC)/pipeline.c $(EXEC)/pipe_utils.c $(EXEC)/cleanup_shell.c $(EXEC)/shlvl.c\
-	$(EXEC)/expand_vars.c $(EXEC)/handle_err.c $(EXEC)/signal_handler.c\
+	$(EXEC)/pipeline.c $(EXEC)/pipe_utils.c $(EXEC)/cleanup_shell.c $(EXEC)/add_new_shell.c\
+	$(EXEC)/handle_err.c $(EXEC)/signal_handler.c\
+	$(XPAND)/expand_vars.c $(XPAND)/expand_dollar.c $(XPAND)/expand_string.c\
+	$(XPAND)/expand_redir.c $(XPAND)/expand_utils.c\
 	$(BUILTINS)/builtin_main.c $(BUILTINS)/builtin_echo_unset.c\
 	$(BUILTINS)/builtin_cd.c $(BUILTINS)/builtin_export.c\
 	$(BUILTINS)/builtin_env_pwd_exit.c

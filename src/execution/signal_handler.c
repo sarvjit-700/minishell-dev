@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/10 09:53:04 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/10 09:53:04 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/26 12:52:55 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ static void	sigint_handler(int sig)
 static void	sigquit_handler(int sig)
 {
 	(void)sig;
-	write(1, "Quit (core dumped)\n", 19);
+	//write(1, "Quit (core dumped)\n", 19);
 	rl_on_new_line();
 	rl_redisplay();
 }

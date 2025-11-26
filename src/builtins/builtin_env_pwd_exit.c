@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/18 13:48:32 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/14 21:05:12 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/25 11:37:33 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,26 +54,30 @@ static int	is_num(const char *str)
 	return (1);
 }
 
-int	builtin_exit(t_cmd *cmd)
+int builtin_exit(t_cmd *cmd, t_shell *shell)
 {
-	int	exit_code;
-
-	if (isatty(STDIN_FILENO))
-		printf("exit\n");
-	exit_code = 0;
-	if (!cmd->argv[1])
-		exit(0);
-	if (!is_num(cmd->argv[1]))
-	{
-		printf("minishell: exit: %s: numeric argument required\n",
-			cmd->argv[1]);
-		exit(255);
-	}
-	if (cmd->argv[2])
-	{
-		printf("minishell: exit: too many arguments\n");
-		return (1);
-	}
-	exit_code = (unsigned char)ft_atoi(cmd->argv[1]);
-	exit(exit_code % 256);
+    if (isatty(STDIN_FILENO))
+        printf("exit\n");
+    if (!cmd->argv[1])
+    {
+        g_exit_code = 0;
+        shell->running = 0;
+        return (g_exit_code);
+    }
+    if (!is_num(cmd->argv[1]))
+    {
+        printf("minishell: exit: %s: numeric argument required\n",
+               cmd->argv[1]);
+        g_exit_code = 2;
+        shell->running = 0;
+        return (g_exit_code);
+    }
+    if (cmd->argv[2])
+    {
+        printf("minishell: exit: too many arguments\n");
+        return (1);
+    }
+    g_exit_code = (unsigned char)ft_atoi(cmd->argv[1]);
+    shell->running = 0;
+    return (g_exit_code % 256);
 }

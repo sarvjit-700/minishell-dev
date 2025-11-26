@@ -6,11 +6,11 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 11:44:03 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/24 10:18:27 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/25 21:42:33 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "minishell.h"
 
 int	is_valid_var(char *var)
 {
