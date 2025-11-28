@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 10:46:41 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/28 11:37:13 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/28 15:52:41 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,11 @@
 int	is_builtin(const char *cmd)
 {
 	if (!cmd)
-	{
 		return (0);
-	}
-	return (!ft_strcmp(cmd, "echo") || !ft_strcmp(cmd, "cd") || !ft_strcmp(cmd,
-			"pwd") || !ft_strcmp(cmd, "export") || !ft_strcmp(cmd, "unset")
-		|| !ft_strcmp(cmd, "env") || !ft_strcmp(cmd, "exit"));
+	return (!ft_strcmp(cmd, "echo") || !ft_strcmp(cmd, "cd")
+		|| !ft_strcmp(cmd, "pwd") || !ft_strcmp(cmd, "export")
+		|| !ft_strcmp(cmd, "unset") || !ft_strcmp(cmd, "env")
+		|| !ft_strcmp(cmd, "exit"));
 }
 
 int	exec_builtin(t_cmd *cmd, t_shell *shell, t_env **env_list)

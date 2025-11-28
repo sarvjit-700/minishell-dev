@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/10 23:35:17 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/27 09:39:38 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/28 12:59:13 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,8 +94,12 @@ int	main(int argc, char **argv, char **envp)
 {
 	t_shell	*shell;
 
-	(void)argc;
 	(void)argv;
+	if (argc > 1)
+	{
+		ft_putstr_fd("minishell: no arguments allowed\n", 2);
+		return (1);
+	}
 	shell = malloc(sizeof(t_shell));
 	if (!shell)
 	{
