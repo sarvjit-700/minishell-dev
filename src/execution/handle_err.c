@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 20:50:52 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/18 10:53:11 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/28 11:39:10 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,12 @@ void	*handle_ptr_err(const char *msg, int code)
 		perror(msg);
 	g_exit_code = code;
 	return (NULL);
+}
+
+int	export_ident_error(char *arg)
+{
+	printf("minishell: export: `%s': not a valid identifier\n", arg);
+	return (1);
 }
 
 static void	set_exit(int type, int child)

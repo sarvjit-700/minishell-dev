@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 11:44:03 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/25 21:42:33 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/28 11:38:58 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,33 +45,26 @@ static int	handle_export_assignment(char *arg, t_env **env_list)
 	char	*eq;
 	char	*key;
 	char	*value;
-	int		ret;
 
 	eq = ft_strchr(arg, '=');
 	if (!eq)
 		return (0);
 	if (eq == arg)
-	{
-		printf("minishell: export: `%s': not a valid identifier\n", arg);
-		return 1;
-	}
+		return (export_ident_error(arg));
 	key = ft_substr(arg, 0, eq - arg);
 	value = ft_strdup(eq + 1);
 	if (!key || !is_valid_var(key))
 	{
-		printf("minishell: export: `%s': not a valid identifier\n", arg);
-		ret = 1;
+		free(key);
+		free(value);
+		return (export_ident_error(arg));
 	}
-	else
-	{
-		set_env(env_list, key, value);
-		ret = 0;
-	}
+	set_env(env_list, key, value);
 	free(key);
 	free(value);
-	return (ret);
+	return (0);
 }
-	
+
 static int	process_export_var(char *arg, t_env **env_list)
 {
 	char	*eq;

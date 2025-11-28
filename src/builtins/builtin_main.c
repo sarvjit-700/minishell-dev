@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 10:46:41 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/25 21:30:36 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/28 11:37:13 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,9 @@ int	is_builtin(const char *cmd)
 	{
 		return (0);
 	}
-	return (!ft_strcmp(cmd, "echo")
-		|| !ft_strcmp(cmd, "cd")
-		|| !ft_strcmp(cmd, "pwd")
-		|| !ft_strcmp(cmd, "export")
-		|| !ft_strcmp(cmd, "unset")
-		|| !ft_strcmp(cmd, "env")
-		|| !ft_strcmp(cmd, "exit"));
+	return (!ft_strcmp(cmd, "echo") || !ft_strcmp(cmd, "cd") || !ft_strcmp(cmd,
+			"pwd") || !ft_strcmp(cmd, "export") || !ft_strcmp(cmd, "unset")
+		|| !ft_strcmp(cmd, "env") || !ft_strcmp(cmd, "exit"));
 }
 
 int	exec_builtin(t_cmd *cmd, t_shell *shell, t_env **env_list)
@@ -66,53 +62,25 @@ static void	set_new_env(t_env **env_list, const char *key, const char *value)
 	new = malloc(sizeof(t_env));
 	if (!new)
 		return ;
-	memset(new, 0, sizeof(t_env));
+	ft_memset(new, 0, sizeof(t_env));
 	new->key = ft_strdup(key);
 	if (!new->key)
-	{
-		free(new);
-		return ;
-	}
+		return (free(new));
 	if (value)
-    {
-        new->value = ft_strdup(value);
-        if (!new->value)
-        {
-            free(new->key);
-            free(new);
-            return ;
-        }
-    }
-    else
-		new->value = NULL;
-	new->exported = true;
-	new->next = *env_list;
-	*env_list = new;
-}
-
-/* above updated
-static void	set_new_env(t_env **env_list, const char *key, const char *value)
-{
-	t_env	*new;
-
-	new = malloc(sizeof(t_env));
-	if (!new)
-		return (NULL);
-	memset(new, 0, sizeof(t_env));
-	new->key = ft_strdup(key);
-	if (!new->key)
 	{
-		free(new);
-		return (NULL);
-	}
-	if (value != NULL)
 		new->value = ft_strdup(value);
+		if (!new->value)
+		{
+			free(new->key);
+			return (free(new));
+		}
+	}
 	else
 		new->value = NULL;
 	new->exported = true;
 	new->next = *env_list;
 	*env_list = new;
-} */
+}
 
 void	set_env(t_env **env_list, const char *key, const char *value)
 {

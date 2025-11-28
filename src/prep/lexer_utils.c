@@ -6,18 +6,18 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 13:56:52 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/20 16:47:07 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/27 09:16:11 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-char *append_char(char *dst, char c)
+char	*append_char(char *dst, char c)
 {
-    char	buf[1];
-	
-    buf[0] = c;
-    return (append_str(dst, buf, 1));
+	char	buf[1];
+
+	buf[0] = c;
+	return (append_str(dst, buf, 1));
 }
 
 bool	is_whitespace(char c)

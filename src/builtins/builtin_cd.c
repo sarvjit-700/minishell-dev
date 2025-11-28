@@ -6,22 +6,18 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 10:44:47 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/14 18:18:37 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/28 12:03:21 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "minishell.h"
 
 int	print_cd_error(const char *target, int err_code)
 {
 	if (err_code == 1)
-	{
 		write(2, "minishell: cd: HOME not set", 27);
-	}
 	else if (err_code == 2)
-	{
 		write(2, "minishell: cd: OLDPWD not set", 29);
-	}
 	else if (err_code == 3)
 	{
 		write(2, "minishell: cd: ", 15);
@@ -45,40 +41,49 @@ int	print_cd_error(const char *target, int err_code)
 	return (1);
 }
 
-int	builtin_cd(t_cmd *cmd, t_env **env_list)
+static char	*resolve_target(t_cmd *cmd, t_env **env_list)
 {
-	char *target;
-	char *oldpwd;
-	char cwd[1024];
-	struct stat sb;
+	char	*arg;
 
-	oldpwd = get_env_value(*env_list, "PWD");
-	if (!cmd->argv[1] || ft_strcmp(cmd->argv[1], "~") == 0)
-	{
-		target = get_env_value(*env_list, "HOME");
-		if (!target)
-			return (print_cd_error(NULL, 1));
-	}
-	else if (cmd->argv[1] && ft_strcmp(cmd->argv[1], "-") == 0)
-	{
-		target = get_env_value(*env_list, "OLDPWD");
-		if (!target)
-			return (print_cd_error(NULL, 2));
-	}
-	else
-		target = cmd->argv[1];
+	arg = cmd->argv[1];
+	if (!arg || ft_strcmp(arg, "~") == 0)
+		return (get_env_value(*env_list, "HOME"));
+	if (ft_strcmp(arg, "-") == 0)
+		return (get_env_value(*env_list, "OLDPWD"));
+	return (arg);
+}
+
+static int	validate_target(char *target)
+{
+	struct stat	sb;
+
+	if (!target)
+		return (print_cd_error(NULL, 1));
 	if (stat(target, &sb) == -1)
 		return (print_cd_error(target, 3));
 	if (!S_ISDIR(sb.st_mode))
 		return (print_cd_error(target, 4));
 	if (access(target, X_OK) == -1)
 		return (print_cd_error(target, 5));
+	return (0);
+}
+
+int	builtin_cd(t_cmd *cmd, t_env **env_list)
+{
+	char	*target;
+	char	*oldpwd;
+	char	cwd[1024];
+
+	oldpwd = get_env_value(*env_list, "PWD");
+	target = resolve_target(cmd, env_list);
+	if (validate_target(target) != 0)
+		return (-1);
 	if (chdir(target) == -1)
 		return (print_cd_error(target, 5));
-	if (getcwd(cwd, sizeof(cwd)) == NULL)
+	if (!getcwd(cwd, sizeof(cwd)))
 		return (print_cd_error(NULL, 0));
-	set_env(env_list, "OLDPWD", oldpwd); // Store previous PWD into OLDPWD
-	set_env(env_list, "PWD", cwd);       // Update PWD to new directory
+	set_env(env_list, "OLDPWD", oldpwd);
+	set_env(env_list, "PWD", cwd);
 	if (cmd->argv[1] && ft_strcmp(cmd->argv[1], "-") == 0)
 	{
 		write(1, cwd, ft_strlen(cwd));

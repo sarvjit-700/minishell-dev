@@ -6,13 +6,13 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/10 23:35:17 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/25 10:21:59 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/27 09:39:38 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int				g_exit_code = 0;
+int	g_exit_code = 0;
 
 int	execute(t_shell *shell, char **envp)
 {
@@ -102,7 +102,7 @@ int	main(int argc, char **argv, char **envp)
 		perror("minishell");
 		return (1);
 	}
-	memset(shell, 0, sizeof(t_shell));
+	ft_memset(shell, 0, sizeof(t_shell));
 	if (init_shell(shell, envp))
 		return (1);
 	run_shell(shell, envp);

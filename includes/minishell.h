@@ -140,6 +140,9 @@ t_token	*extract_words(const char **input);
 // -- lexer quoted -- //
 char	*append_quoted(const char **input, char *words);
 
+// -- lexer esc end -- //
+char	*append_until_esc_end(const char **input, char *words);
+char	*handle_esc_char(const char **input, char *words);
 // lexer-utils //
 char *append_char(char *dst, char c);
 bool is_whitespace(char c);
@@ -160,47 +163,32 @@ int	process_token(t_parser_state *ps);
 int	start_cmd(t_parser_state *ps);
 int	handle_word(t_parser_state *ps);
 
-// -- EXECUTION -- //
-// -- executor --// -- sorted
-int	execute(t_shell *shell, char **envp);
 
-// -- exec_cmd -- // -- sorted
-int	execute_command(t_shell *shell, t_cmd *cmd, char **envp);
 
-// -- shell level -- //
-void    adjust_shlvl(t_env **env_list);
-int    add_new_shell(t_env *parent);
-
-// -- run_shell -- // -- sorted
-void	run_shell(t_shell *shell, char **envp);
-
-// -- paths -- // -- sorted
-char	*find_exec(char *cmd, char **envp);
-
-// -- PIPELINE -- // --SORTED
+// -- OPERATORS -- //
 int    init_pipe_data(t_cmd *cmd_list, char **envp, t_env **env_list);
 
-// -- pipe_utils --// -- sorted
+// -- pipe_utils --//
 int	**create_pipes(t_pipe_data *data);
 void	close_parent_pipes(t_pipe_data *data);
 void	child_process(t_pipe_data *data, t_cmd *cmd, char **envp);
 
-// -- redirs -- // NEED TO SORT
+// -- redirs -- //
 int apply_redirs(t_cmd *cmd);
-int process_heredocs(t_cmd *cmd_list); // move later
+int process_heredocs(t_cmd *cmd_list);
 
-// -- CLEANUP -- //
-void free_pipe_data(t_pipe_data *data);
+// -- cleanup_shell -- //
+void	free_cmd_list(t_cmd *cmd);
+void    free_tokens(t_token *token);
 void cleanup_simple(t_shell *shell);
 void cleanup_shell(t_shell *shell);
-void	free_cmd_list(t_cmd *cmd);
+
+// -- cleanup_general -- //
 void free_env_list(t_env *env);
 void    free_env_array(char **envp);
-void    free_tokens(t_token *token); // move later
-int extract_exit_code(int status); //move later
+void free_pipe_data(t_pipe_data *data);
+int extract_exit_code(int status);
 
-// -- Signal Handler -- // -- sorted
-void setup_signal_handlers(int sig_type);
 
 // -- EXPANSION -- //
 // -- Expand Vars -- // NEED TO SORT
@@ -218,9 +206,31 @@ char	*expand_string(char *str, t_shell *shell);
 int	expand_redirs(t_cmd *cmd, t_shell *shell);
 char	*expand_dollar(char *str, int *i, t_shell *shell, char *res);
 
+// -- EXECUTION -- //
+// -- Signal Handler -- //
+void setup_signal_handlers(int sig_type);
+
+// -- executor --//
+int	execute(t_shell *shell, char **envp);
+
+// -- exec_cmd -- //
+int	execute_command(t_shell *shell, t_cmd *cmd, char **envp);
+
+// -- shell level -- //
+void    adjust_shlvl(t_env **env_list);
+int    add_new_shell(t_env *parent);
+char	**env_to_array(t_env *env_list);
+
+// -- run_shell -- //
+void	run_shell(t_shell *shell, char **envp);
+
+// -- paths -- // 
+char	*find_exec(char *cmd, char **envp);
+
 // -- Handle Error -- //
 void    *handle_ptr_err(const char *msg, int code);
 void    handle_exec_error(const char *path, int child);
+int	export_ident_error(char *arg);
 
 // -- BUILTINS -- //
 // -- main -- //

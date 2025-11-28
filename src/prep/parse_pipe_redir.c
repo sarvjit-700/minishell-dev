@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 00:55:32 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/18 16:07:58 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/27 09:38:46 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ static int	add_redir(t_cmd *cmd, t_token_type type, const char *filename)
 	new_rdr = malloc(sizeof(t_redir));
 	if (new_rdr == NULL)
 		return (0);
-	memset(new_rdr, 0, sizeof(t_redir));
+	ft_memset(new_rdr, 0, sizeof(t_redir));
 	new_rdr->type = type;
 	new_rdr->fd = -1;
 	new_rdr->filename = ft_strdup(filename);

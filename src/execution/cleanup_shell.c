@@ -6,67 +6,13 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/05 11:53:54 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/05 11:53:54 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/28 08:36:15 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int extract_exit_code(int status)
- {
-    int sig;
-    int core;
-
-    sig = status & 0x7F;
-    core = status & 0x80;
-    if (sig == 0)
-        return (status >> 8);
-    if (sig == SIGINT)
-    {
-        write(1, "\n", 1);
-        return (128 + sig);
-    }
-    if (sig == SIGQUIT)
-    {
-        if (core)
-            write(2, "Quit (core dumped)\n", 20);
-        else
-            write(1, "\n", 1);
-        return (128 + sig);
-    }
-    return (128 + sig);
- }
-
-static void cleanup_pipes(int **pipes, int cmd_count)
-{
-    int i;
-
-    i = 0;
-    if (!pipes)
-        return;
-    while (i < cmd_count - 1)
-    {
-        if (pipes[i])
-        {
-            close(pipes[i][0]);
-            close(pipes[i][1]);
-            free(pipes[i]);
-        }
-        i++;
-    }
-    free(pipes);
-}
-
-void free_pipe_data(t_pipe_data *data)
-{
-    if (!data)
-        return;
-    cleanup_pipes(data->pipes, data->cmd_count);
-    data->pipes = NULL;
-    free(data);
-}
-
-void	free_redir(t_redir *rdr)
+static void	free_redir(t_redir *rdr)
 {
 	t_redir	*tmp;
 
@@ -102,90 +48,47 @@ void	free_cmd_list(t_cmd *cmd)
 		cmd = tmp_cmd;
 	}
 }
-/*
-void	free_env(t_env *env)
-{
-	t_env	*tmp;
 
-	while (env)
+void	free_tokens(t_token *token)
+{
+	t_token	*next;
+
+	while (token)
 	{
-		tmp = env->next;
-		if (env->key)
-			free(env->key);
-		if (env->value)
-			free(env->value);
-		free(env);
-		env = tmp;
+		next = token->next;
+		if (token->value)
+			free(token->value);
+		free(token);
+		token = next;
 	}
 }
-    */
 
-void free_env_list(t_env *env)
+void	cleanup_simple(t_shell *shell)
 {
-    t_env *tmp;
-
-    while (env)
-    {
-        tmp = env->next;
-        free(env->key);
-        free(env->value);
-        free(env);
-        env = tmp;
-    }
-}
-
-void    free_env_array(char **envp)
-{
-    int i = 0;
-    while (envp[i])
-    {
-        free(envp[i]);
-        i++;
-    }
-    free(envp);
-}
-
-
-void    free_tokens(t_token *token)
-{
-    t_token *next;
-
-    while (token)
-    {
-        next = token->next;
-        if (token->value)
-            free(token->value);
-        free(token);
-        token = next;
-    }
-}
-
-void cleanup_simple(t_shell *shell)
-{
-    if (shell->tokens)
-    {
+	if (shell->tokens)
+	{
 		free_tokens(shell->tokens);
-        shell->tokens = NULL;
-    }
+		shell->tokens = NULL;
+	}
 	if (shell->cmd_list)
-    {
+	{
 		free_cmd_list(shell->cmd_list);
-        shell->cmd_list = NULL;
-    }
-    if (shell->line)
-    {
+		shell->cmd_list = NULL;
+	}
+	if (shell->line)
+	{
 		free(shell->line);
-        shell->line = NULL;
-    }
+		shell->line = NULL;
+	}
 }
 
-void cleanup_shell(t_shell *shell)
+void	cleanup_shell(t_shell *shell)
 {
-    cleanup_simple(shell);
+	cleanup_simple(shell);
 	if (shell->env_list)
-    {
+	{
 		free_env_list(shell->env_list);
-        shell->env_list = NULL;
-    }
-    free(shell);
+		shell->env_list = NULL;
+	}
+	free(shell);
 }

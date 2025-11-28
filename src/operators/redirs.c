@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/20 10:09:48 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/10/20 10:09:48 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/27 11:42:50 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,20 @@ static int	redir_heredoc(t_redir *r)
 	return (0);
 }
 
+static int	handle_redir_type(t_redir *r)
+{
+	if (r->type == TOKEN_REDIR_IN)
+		return (redir_in(r));
+	else if (r->type == TOKEN_REDIR_OUT)
+		return (redir_out_append(r, 1));
+	else if (r->type == TOKEN_APPEND)
+		return (redir_out_append(r, 2));
+	else if (r->type == TOKEN_HEREDOC)
+		return (redir_heredoc(r));
+	printf("minishell: unknown redirection type\n");
+	return (-1);
+}
+
 int	apply_redirs(t_cmd *cmd)
 {
 	t_redir	*r;
@@ -78,107 +92,13 @@ int	apply_redirs(t_cmd *cmd)
 	ret = 0;
 	if (!cmd)
 		return (0);
-	ret = 0;
 	r = cmd->redir;
 	while (r)
 	{
-		if (r->type == TOKEN_REDIR_IN)
-			ret = redir_in(r);
-		else if (r->type == TOKEN_REDIR_OUT)
-			ret = redir_out_append(r, 1);
-		else if (r->type == TOKEN_APPEND)
-			ret = redir_out_append(r, 2);
-		else if (r->type == TOKEN_HEREDOC)
-			ret = redir_heredoc(r);
-		else
-		{
-			printf("minishell: unknown redirection type\n");
-			return (-1);
-		}
+		ret = handle_redir_type(r);
 		if (ret == -1)
 			return (-1);
 		r = r->next;
-	}
-	return (0);
-}
-
-int	create_heredoc(const char *delimiter)
-{
-	int		pipefd[2];
-	pid_t	pid;
-	int		status;
-		char *line;
-
-	if (pipe(pipefd) == -1)
-	{
-		perror("pipe");
-		g_exit_code = 1;
-		return (-1);
-	}
-	pid = fork();
-	if (pid == -1)
-	{
-		perror("fork");
-		g_exit_code = 1;
-		close(pipefd[0]);
-		close(pipefd[1]);
-		return (-1);
-	}
-	if (pid == 0)
-	{
-		setup_signal_handlers(2);
-		close(pipefd[0]);
-		while (1)
-		{
-			line = readline("> ");
-			if (!line)
-				exit(0);
-			if (ft_strcmp(line, delimiter) == 0)
-			{
-				free(line);
-				exit(0);
-			}
-			write(pipefd[1], line, ft_strlen(line));
-			write(pipefd[1], "\n", 1);
-			free(line);
-		}
-	}
-	// ---- parent ----
-	close(pipefd[1]); // parent only reads
-	waitpid(pid, &status, 0);
-	g_exit_code = extract_exit_code(status);
-	if (g_exit_code == 130)
-	{
-		close(pipefd[0]);
-		return (-1);
-	}
-	return (pipefd[0]); // read-end of heredoc data
-}
-
-int	process_heredocs(t_cmd *cmd_list)
-{
-	t_cmd	*cmd;
-	t_redir	*r;
-
-	cmd = cmd_list;
-	while (cmd)
-	{
-		r = cmd->redir;
-		while (r)
-		{
-			if (r->type == TOKEN_HEREDOC)
-			{
-				r->fd = create_heredoc(r->filename); // filename = delimiter
-				if (r->fd == -1)
-				{
-					if (g_exit_code != 130)
-						g_exit_code = 1;
-					return (-1);
-				}
-			}
-			r = r->next;
-		}
-		cmd = cmd->next;
 	}
 	return (0);
 }

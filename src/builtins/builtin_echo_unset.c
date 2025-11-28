@@ -6,11 +6,11 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 10:56:19 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/20 10:00:39 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/11/28 09:11:46 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "minishell.h"
 
 static int	is_n_flag(char *arg)
 {
@@ -42,7 +42,7 @@ int	builtin_echo(char **argv)
 	{
 		write(1, argv[i], ft_strlen(argv[i]));
 		if (argv[i + 1])
-			write(1," ", 1);
+			write(1, " ", 1);
 		i++;
 	}
 	if (!n_flag)
