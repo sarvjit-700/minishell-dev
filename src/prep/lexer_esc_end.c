@@ -35,7 +35,7 @@ char	*handle_esc_char(const char **input, char *words)
 	if (**input == '\\' && *(*input + 1))
 	{
 		c = *(*input + 1);
-		if (c == '"' || c == '\\')
+		if (c == '"')
 			words = append_str(words, &c, 1);
 		else
 			words = append_str(words, *input, 2);

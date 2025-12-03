@@ -73,6 +73,9 @@ char	*expand_dollar(char *str, int *i, t_shell *shell, char *res)
 		return (expand_digit(str, i, shell, res));
 	if (ft_isalpha(str[*i + 1]) || str[*i + 1] == '_')
 		return (expand_named_var(str, i, shell, res));
+	res = expand_var(res, "$");
+	if (!res)
+		return (NULL);
 	(*i)++;
 	return (res);
 }

@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/18 13:48:32 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/28 09:48:30 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/12/01 12:52:25 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,6 @@ int	builtin_exit(t_cmd *cmd, t_shell *shell)
 		printf("exit\n");
 	if (!cmd->argv[1])
 	{
-		g_exit_code = 0;
 		shell->running = 0;
 		return (g_exit_code);
 	}
