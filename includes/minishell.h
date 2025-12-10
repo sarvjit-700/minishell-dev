@@ -98,15 +98,6 @@ typedef struct s_env
 	struct s_env	*next;
 }	t_env;
 
-// -- For Pipeline -- //
-typedef struct s_pipe_data
-{
-	int				i;
-	int				cmd_count;
-	int				**pipes;
-	t_env			**env_list;
-}	t_pipe_data;
-
 typedef struct s_shell
 {
 	t_env			*env_list;
@@ -117,6 +108,16 @@ typedef struct s_shell
 	int				running;
 	int				should_exit;
 }	t_shell;
+
+// -- For Pipeline -- //
+typedef struct s_pipe_data
+{
+	int				i;
+	int				cmd_count;
+	int				**pipes;
+	t_env			**env_list;
+	t_shell			*shell;
+}	t_pipe_data;
 
 // -- For Expansion -- //
 typedef enum e_mode
@@ -160,7 +161,7 @@ int			start_cmd(t_parser_state *ps);
 int			handle_word(t_parser_state *ps);
 
 // -- OPERATORS -- //
-int			init_pipe_data(t_cmd *cmd_list, char **envp, t_env **env_list);
+int			init_pipe_data(t_cmd *cmd_list, char **envp, t_env **env_list, t_shell *shell);
 
 // -- pipe_utils --//
 int			**create_pipes(t_pipe_data *data);
@@ -169,7 +170,7 @@ void		child_process(t_pipe_data *data, t_cmd *cmd, char **envp);
 
 // -- redirs -- //
 int			apply_redirs(t_cmd *cmd);
-int			process_heredocs(t_cmd *cmd_list);
+int			process_heredocs(t_cmd *cmd_list, t_shell *shell);
 
 // -- cleanup_shell -- //
 void		free_cmd_list(t_cmd *cmd);

@@ -1,0 +1,184 @@
+==79441== Memcheck, a memory error detector
+==79441== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==79441== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==79441== Command: ./minishell
+==79441== Parent PID: 77080
+==79441== 
+==79442== 
+==79442== HEAP SUMMARY:
+==79442==     in use at exit: 217,405 bytes in 375 blocks
+==79442==   total heap usage: 642 allocs, 267 frees, 244,302 bytes allocated
+==79442== 
+==79442== 2 bytes in 1 blocks are still reachable in loss record 1 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x10F816: ft_strdup (in /home/sarb/minishell/minishell)
+==79442==    by 0x10E38E: set_env (builtin_main.c:95)
+==79442==    by 0x10BA26: adjust_shlvl (add_new_shell.c:56)
+==79442==    by 0x10A93E: init_shell (executor.c:96)
+==79442==    by 0x10AA0E: main (executor.c:122)
+==79442== 
+==79442== 2 bytes in 1 blocks are still reachable in loss record 2 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x109A6F: create_token (lexer_utils.c:42)
+==79442==    by 0x109836: extract_operator (lexer_main.c:84)
+==79442==    by 0x109BB8: tokenize (tokenizer.c:30)
+==79442==    by 0x10AEB6: tokenize_input (run_shell.c:32)
+==79442==    by 0x10B07C: run_shell (run_shell.c:93)
+==79442==    by 0x10AA2C: main (executor.c:124)
+==79442== 
+==79442== 8 bytes in 1 blocks are still reachable in loss record 5 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x10CB08: create_pipe_arr (pipe_utils.c:21)
+==79442==    by 0x10CB4C: create_pipes (pipe_utils.c:35)
+==79442==    by 0x10C981: execute_pipeline (pipeline.c:73)
+==79442==    by 0x10CAA6: init_pipe_data (pipeline.c:102)
+==79442==    by 0x10A76C: execute (executor.c:37)
+==79442==    by 0x10B0EC: run_shell (run_shell.c:104)
+==79442==    by 0x10AA2C: main (executor.c:124)
+==79442== 
+==79442== 8 bytes in 1 blocks are still reachable in loss record 6 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x10CB8C: create_pipes (pipe_utils.c:41)
+==79442==    by 0x10C981: execute_pipeline (pipeline.c:73)
+==79442==    by 0x10CAA6: init_pipe_data (pipeline.c:102)
+==79442==    by 0x10A76C: execute (executor.c:37)
+==79442==    by 0x10B0EC: run_shell (run_shell.c:104)
+==79442==    by 0x10AA2C: main (executor.c:124)
+==79442== 
+==79442== 8 bytes in 1 blocks are still reachable in loss record 7 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x10C86B: create_pids (pipeline.c:51)
+==79442==    by 0x10C9C0: execute_pipeline (pipeline.c:76)
+==79442==    by 0x10CAA6: init_pipe_data (pipeline.c:102)
+==79442==    by 0x10A76C: execute (executor.c:37)
+==79442==    by 0x10B0EC: run_shell (run_shell.c:104)
+==79442==    by 0x10AA2C: main (executor.c:124)
+==79442== 
+==79442== 15 bytes in 3 blocks are still reachable in loss record 13 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x109A6F: create_token (lexer_utils.c:42)
+==79442==    by 0x109945: extract_words (lexer_main.c:110)
+==79442==    by 0x109BCA: tokenize (tokenizer.c:32)
+==79442==    by 0x10AEB6: tokenize_input (run_shell.c:32)
+==79442==    by 0x10B07C: run_shell (run_shell.c:93)
+==79442==    by 0x10AA2C: main (executor.c:124)
+==79442== 
+==79442== 15 bytes in 3 blocks are still reachable in loss record 14 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x10F816: ft_strdup (in /home/sarb/minishell/minishell)
+==79442==    by 0x10DED1: process_expanded (expand_utils.c:88)
+==79442==    by 0x10D0B7: fill_expanded_argv (expand_vars.c:75)
+==79442==    by 0x10D17C: expand_cmd_argv (expand_vars.c:96)
+==79442==    by 0x10D1EC: expand_variables (expand_vars.c:113)
+==79442==    by 0x10B0CF: run_shell (run_shell.c:102)
+==79442==    by 0x10AA2C: main (executor.c:124)
+==79442== 
+==79442== 24 bytes in 1 blocks are still reachable in loss record 22 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x109A35: create_token (lexer_utils.c:37)
+==79442==    by 0x109836: extract_operator (lexer_main.c:84)
+==79442==    by 0x109BB8: tokenize (tokenizer.c:30)
+==79442==    by 0x10AEB6: tokenize_input (run_shell.c:32)
+==79442==    by 0x10B07C: run_shell (run_shell.c:93)
+==79442==    by 0x10AA2C: main (executor.c:124)
+==79442== 
+==79442== 24 bytes in 1 blocks are still reachable in loss record 23 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x10CA27: init_pipe_data (pipeline.c:90)
+==79442==    by 0x10A76C: execute (executor.c:37)
+==79442==    by 0x10B0EC: run_shell (run_shell.c:104)
+==79442==    by 0x10AA2C: main (executor.c:124)
+==79442== 
+==79442== 40 bytes in 2 blocks are still reachable in loss record 26 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x10D15A: expand_cmd_argv (expand_vars.c:93)
+==79442==    by 0x10D1EC: expand_variables (expand_vars.c:113)
+==79442==    by 0x10B0CF: run_shell (run_shell.c:102)
+==79442==    by 0x10AA2C: main (executor.c:124)
+==79442== 
+==79442== 48 bytes in 1 blocks are still reachable in loss record 29 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x10A9C4: main (executor.c:115)
+==79442== 
+==79442== 64 bytes in 2 blocks are still reachable in loss record 31 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x10A448: new_command (parse_word.c:19)
+==79442==    by 0x10A605: start_cmd (parse_word.c:63)
+==79442==    by 0x10A697: handle_word (parse_word.c:81)
+==79442==    by 0x10A3EB: process_token (parse_pipe_redir.c:85)
+==79442==    by 0x10A0FE: parse_tokens (parser_main.c:32)
+==79442==    by 0x10AE3C: parse_input (run_shell.c:17)
+==79442==    by 0x10B093: run_shell (run_shell.c:96)
+==79442==    by 0x10AA2C: main (executor.c:124)
+==79442== 
+==79442== 72 bytes in 3 blocks are still reachable in loss record 32 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x109A35: create_token (lexer_utils.c:37)
+==79442==    by 0x109945: extract_words (lexer_main.c:110)
+==79442==    by 0x109BCA: tokenize (tokenizer.c:32)
+==79442==    by 0x10AEB6: tokenize_input (run_shell.c:32)
+==79442==    by 0x10B07C: run_shell (run_shell.c:93)
+==79442==    by 0x10AA2C: main (executor.c:124)
+==79442== 
+==79442== 264 bytes in 1 blocks are still reachable in loss record 40 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x10BD47: env_to_array (build_envp_copy.c:74)
+==79442==    by 0x10A6F5: execute (executor.c:24)
+==79442==    by 0x10B0EC: run_shell (run_shell.c:104)
+==79442==    by 0x10AA2C: main (executor.c:124)
+==79442== 
+==79442== 346 bytes in 32 blocks are still reachable in loss record 41 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x10FFA9: ft_substr (in /home/sarb/minishell/minishell)
+==79442==    by 0x10A803: create_env_node (executor.c:55)
+==79442==    by 0x10A89D: env_init (executor.c:78)
+==79442==    by 0x10A909: init_shell (executor.c:90)
+==79442==    by 0x10AA0E: main (executor.c:122)
+==79442== 
+==79442== 1,024 bytes in 32 blocks are still reachable in loss record 54 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x10A7B6: create_env_node (executor.c:49)
+==79442==    by 0x10A89D: env_init (executor.c:78)
+==79442==    by 0x10A909: init_shell (executor.c:90)
+==79442==    by 0x10AA0E: main (executor.c:122)
+==79442== 
+==79442== 3,414 bytes in 31 blocks are still reachable in loss record 59 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x10F816: ft_strdup (in /home/sarb/minishell/minishell)
+==79442==    by 0x10A81A: create_env_node (executor.c:56)
+==79442==    by 0x10A89D: env_init (executor.c:78)
+==79442==    by 0x10A909: init_shell (executor.c:90)
+==79442==    by 0x10AA0E: main (executor.c:122)
+==79442== 
+==79442== 3,762 bytes in 32 blocks are still reachable in loss record 60 of 85
+==79442==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==79442==    by 0x10BBA8: build_env_entry (build_envp_copy.c:23)
+==79442==    by 0x10BCB1: fill_envp (build_envp_copy.c:57)
+==79442==    by 0x10BD6C: env_to_array (build_envp_copy.c:77)
+==79442==    by 0x10A6F5: execute (executor.c:24)
+==79442==    by 0x10B0EC: run_shell (run_shell.c:104)
+==79442==    by 0x10AA2C: main (executor.c:124)
+==79442== 
+==79442== LEAK SUMMARY:
+==79442==    definitely lost: 0 bytes in 0 blocks
+==79442==    indirectly lost: 0 bytes in 0 blocks
+==79442==      possibly lost: 0 bytes in 0 blocks
+==79442==    still reachable: 9,140 bytes in 149 blocks
+==79442==         suppressed: 208,265 bytes in 226 blocks
+==79442== 
+==79442== For lists of detected and suppressed errors, rerun with: -s
+==79442== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==79441== 
+==79441== HEAP SUMMARY:
+==79441==     in use at exit: 208,195 bytes in 222 blocks
+==79441==   total heap usage: 706 allocs, 484 frees, 248,652 bytes allocated
+==79441== 
+==79441== LEAK SUMMARY:
+==79441==    definitely lost: 0 bytes in 0 blocks
+==79441==    indirectly lost: 0 bytes in 0 blocks
+==79441==      possibly lost: 0 bytes in 0 blocks
+==79441==    still reachable: 0 bytes in 0 blocks
+==79441==         suppressed: 208,195 bytes in 222 blocks
+==79441== 
+==79441== For lists of detected and suppressed errors, rerun with: -s
+==79441== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

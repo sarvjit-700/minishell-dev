@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/10 23:35:17 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/28 12:59:13 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/12/10 22:02:41 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,10 @@ int	execute(t_shell *shell, char **envp)
 	cmd_list = shell->cmd_list;
 	if (!cmd_list)
 		return (0);
-	if (process_heredocs(cmd_list) == -1)
+	if (process_heredocs(cmd_list, shell) == -1)
 		return (g_exit_code);
 	if (cmd_list->next)
-		return (init_pipe_data(shell->cmd_list, envp, &shell->env_list));
+		return (init_pipe_data(shell->cmd_list, envp, &shell->env_list, shell));
 	else
 		return (execute_command(shell, cmd_list, envp));
 }
@@ -110,6 +110,8 @@ int	main(int argc, char **argv, char **envp)
 	if (init_shell(shell, envp))
 		return (1);
 	run_shell(shell, envp);
+	rl_clear_history(); 
+    clear_history();
 	cleanup_shell(shell);
 	exit(g_exit_code);
 }

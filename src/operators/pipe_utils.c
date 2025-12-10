@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/07 09:58:31 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/25 09:42:53 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/12/10 22:21:42 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,56 @@ void	close_parent_pipes(t_pipe_data *data)
 	}
 }
 
+
+static void	exec_child(t_pipe_data *data, t_cmd *cmd, char **envp)
+{
+	int		j;
+	int		exit_code;
+	char	*path;
+	char	**new_envp;
+	
+	(void)envp;
+	new_envp = env_to_array(*data->env_list);
+	j = 0;
+	while (j < data->cmd_count - 1)
+	{
+		close(data->pipes[j][0]);
+		close(data->pipes[j][1]);
+		j++;
+	}
+	if (apply_redirs(cmd) == -1)
+	{
+		cleanup_shell(data->shell);
+		free_pipe_data(data);
+		free_env_array(new_envp);	
+		exit(1);
+	}
+	if (is_builtin(cmd->argv[0]))
+	{
+		exit_code = exec_builtin(cmd, NULL, data->env_list);
+		cleanup_shell(data->shell);
+		free_pipe_data(data);
+		free_env_array(new_envp);	
+		exit(exit_code);
+	}
+	path = find_exec(cmd->argv[0], new_envp);
+	if (!path && !is_builtin(cmd->argv[0]))
+	{
+		handle_exec_error(cmd->argv[0], 0);
+		cleanup_shell(data->shell);
+		free_pipe_data(data);
+		free_env_array(new_envp);
+		exit(127);
+	}
+	execve(path, cmd->argv, new_envp);
+	handle_exec_error(path, 0);
+	free(path);
+	cleanup_shell(data->shell);
+	free_pipe_data(data);
+	free_env_array(new_envp);
+	exit(127);
+}
+/*
 static void	exec_child(t_pipe_data *data, t_cmd *cmd, char **envp)
 {
 	int		j;
@@ -91,6 +141,7 @@ static void	exec_child(t_pipe_data *data, t_cmd *cmd, char **envp)
 	free(path);
 	exit(127);
 }
+*/
 
 void	child_process(t_pipe_data *data, t_cmd *cmd, char **envp)
 {

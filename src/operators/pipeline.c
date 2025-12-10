@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/05 11:54:04 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/18 10:57:17 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/12/10 21:38:03 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,10 @@ static int	*create_pids(t_cmd *cmd_list, t_pipe_data *data, char **envp)
 		if (pids[data->i] == -1)
 			return (handle_ptr_err("fork", 1));
 		if (pids[data->i] == 0)
+		{
+			free(pids);
 			child_process(data, cmd, envp);
+		}
 		cmd = cmd->next;
 		data->i++;
 	}
@@ -82,7 +85,7 @@ static int	execute_pipeline(t_pipe_data *data, t_cmd *cmd_list, char **envp)
 	return (status);
 }
 
-int	init_pipe_data(t_cmd *cmd_list, char **envp, t_env **env_list)
+int	init_pipe_data(t_cmd *cmd_list, char **envp, t_env **env_list, t_shell *shell)
 {
 	t_pipe_data	*data;
 	int			status;
@@ -90,9 +93,13 @@ int	init_pipe_data(t_cmd *cmd_list, char **envp, t_env **env_list)
 	data = malloc(sizeof(t_pipe_data));
 	if (!data)
 		return (1);
+	data->shell = shell;
 	data->cmd_count = count_cmds(cmd_list);
 	if (data->cmd_count == 0)
+	{
+		free(data);
 		return (1);
+	}
 	data->i = 0;
 	data->pipes = NULL;
 	data->env_list = env_list;

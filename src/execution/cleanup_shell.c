@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/05 11:53:54 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/28 08:36:15 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/12/10 21:52:22 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@ static void	free_redir(t_redir *rdr)
 	while (rdr)
 	{
 		tmp = rdr->next;
+		if (rdr->fd > 0)
+			close(rdr->fd);
 		free(rdr->filename);
 		free(rdr);
 		rdr = tmp;
@@ -43,7 +45,8 @@ void	free_cmd_list(t_cmd *cmd)
 			}
 			free(cmd->argv);
 		}
-		free_redir(cmd->redir);
+		if (cmd->redir)
+			free_redir(cmd->redir);
 		free(cmd);
 		cmd = tmp_cmd;
 	}
@@ -90,5 +93,6 @@ void	cleanup_shell(t_shell *shell)
 		free_env_list(shell->env_list);
 		shell->env_list = NULL;
 	}
+	rl_clear_history();
 	free(shell);
 }

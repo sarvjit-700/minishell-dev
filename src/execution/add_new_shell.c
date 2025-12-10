@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 10:30:34 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/26 22:20:03 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/12/10 10:33:25 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,14 +38,15 @@ static t_env	*copy_env_list(t_env *src)
 
 void	adjust_shlvl(t_env **env_list)
 {
-	char	*old;
+	char	*old_val;
 	long	level;
 	char	*new_val;
 
 	level = 0;
-	old = get_env_value(*env_list, "SHLVL");
-	if (old && *old != '\0')
-		level = ft_atol(old);
+	old_val = get_env_value(*env_list, "SHLVL");
+	if (old_val && *old_val != '\0')
+		level = ft_atol(old_val);
+	old_val = NULL;
 	level = level + 1;
 	if (level < 0)
 		level = 0;
