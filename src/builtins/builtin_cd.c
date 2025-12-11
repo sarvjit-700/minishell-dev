@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 10:44:47 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/28 15:13:35 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/12/11 20:27:05 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,11 @@ int	builtin_cd(t_cmd *cmd, t_env **env_list)
 	char	*oldpwd;
 	char	cwd[1024];
 
+	if (cmd->argc > 2)
+	{
+		ft_putstr_fd("minishell: cd: too many arguments\n", 2);
+		return (1);
+	}
 	oldpwd = get_env_value(*env_list, "PWD");
 	target = resolve_target(cmd, env_list);
 	if (validate_target(target) != 0)

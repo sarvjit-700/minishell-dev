@@ -85,7 +85,7 @@ static int	handle_parent_logic(t_shell *shell, t_cmd *cmd)
 	}
 	if (ft_strcmp(cmd->argv[0], "./minishell") == 0)
 	{
-		status = add_new_shell(shell->env_list);
+		status = add_new_shell(shell);
 		shell->last_status = status;
 		g_exit_code = status;
 		return (1);

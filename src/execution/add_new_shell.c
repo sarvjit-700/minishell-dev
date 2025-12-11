@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 10:30:34 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/12/10 10:33:25 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/12/11 20:40:26 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ void	adjust_shlvl(t_env **env_list)
 	free(new_val);
 }
 
-static void	new_exec_child(char **envp)
+static void	new_exec_child(t_shell *shell, t_env *child_env, char **envp)
 {
 	char	*argv_exec[2];
 
@@ -65,23 +65,26 @@ static void	new_exec_child(char **envp)
 	argv_exec[1] = NULL;
 	execve("./minishell", argv_exec, envp);
 	perror("execve");
+	free_env_array(envp);
+	free_env_list(child_env);
+	cleanup_shell(shell);
 	exit(1);
 }
 
-int	add_new_shell(t_env *parent)
+int	add_new_shell(t_shell *shell)
 {
 	pid_t	pid;
 	int		status;
 	t_env	*child_env;
 	char	**envp;
 
-	child_env = copy_env_list(parent);
+	child_env = copy_env_list(shell->env_list);
 	if (!child_env)
 		return (1);
 	envp = env_to_array(child_env);
 	pid = fork();
 	if (pid == 0)
-		new_exec_child(envp);
+		new_exec_child(shell, child_env, envp);
 	waitpid(pid, &status, 0);
 	free_env_array(envp);
 	free_env_list(child_env);

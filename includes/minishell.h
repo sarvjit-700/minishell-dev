@@ -213,7 +213,7 @@ int			execute_command(t_shell *shell, t_cmd *cmd, char **envp);
 
 // -- shell level -- //
 void		adjust_shlvl(t_env **env_list);
-int			add_new_shell(t_env *parent);
+int			add_new_shell(t_shell *shell);
 char		**env_to_array(t_env *env_list);
 
 // -- run_shell -- //
