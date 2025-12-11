@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/10 09:53:04 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/28 12:57:03 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/12/11 13:17:58 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,14 @@ static void	sigquit_handler(int sig)
 	(void)sig;
 	rl_on_new_line();
 	rl_redisplay();
+}
+
+void	heredoc_sigint(int sig)
+{
+	(void)sig;
+	g_exit_code = 130;
+	write (1, "\n", 1);
+	close(STDIN_FILENO);
 }
 
 void	setup_signal_handlers(int sig_type)

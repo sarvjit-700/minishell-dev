@@ -59,7 +59,7 @@ int	builtin_exit(t_cmd *cmd, t_shell *shell)
 	if (isatty(STDIN_FILENO))
 		printf("exit\n");
 	if (!shell)
-        exit(g_exit_code);
+		return (g_exit_code);
 	if (!cmd->argv[1])
 	{
 		shell->running = 0;

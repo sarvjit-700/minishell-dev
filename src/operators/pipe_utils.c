@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/07 09:58:31 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/12/10 22:21:42 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/12/11 15:28:16 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,27 +51,28 @@ int	**create_pipes(t_pipe_data *data)
 	return (pipes);
 }
 
-void	close_parent_pipes(t_pipe_data *data)
+static void	exec_external(t_pipe_data *data, t_cmd *cmd, char **new_envp)
 {
-	int	i;
+	char	*path;
 
-	i = 0;
-	while (i < data->cmd_count - 1)
+	path = find_exec(cmd->argv[0], *data->env_list);
+	if (!path && !is_builtin(cmd->argv[0]))
 	{
-		close(data->pipes[i][0]);
-		close(data->pipes[i][1]);
-		i++;
+		handle_exec_error(cmd->argv[0], 0);
+		clean_pipe_exit(data, new_envp, 127);
 	}
+	execve(path, cmd->argv, new_envp);
+	handle_exec_error(path, 0);
+	free(path);
+	clean_pipe_exit(data, new_envp, 127);
 }
-
 
 static void	exec_child(t_pipe_data *data, t_cmd *cmd, char **envp)
 {
 	int		j;
 	int		exit_code;
-	char	*path;
 	char	**new_envp;
-	
+
 	(void)envp;
 	new_envp = env_to_array(*data->env_list);
 	j = 0;
@@ -82,66 +83,14 @@ static void	exec_child(t_pipe_data *data, t_cmd *cmd, char **envp)
 		j++;
 	}
 	if (apply_redirs(cmd) == -1)
-	{
-		cleanup_shell(data->shell);
-		free_pipe_data(data);
-		free_env_array(new_envp);	
-		exit(1);
-	}
+		clean_pipe_exit(data, new_envp, 1);
 	if (is_builtin(cmd->argv[0]))
 	{
 		exit_code = exec_builtin(cmd, NULL, data->env_list);
-		cleanup_shell(data->shell);
-		free_pipe_data(data);
-		free_env_array(new_envp);	
-		exit(exit_code);
+		clean_pipe_exit(data, new_envp, exit_code);
 	}
-	path = find_exec(cmd->argv[0], new_envp);
-	if (!path && !is_builtin(cmd->argv[0]))
-	{
-		handle_exec_error(cmd->argv[0], 0);
-		cleanup_shell(data->shell);
-		free_pipe_data(data);
-		free_env_array(new_envp);
-		exit(127);
-	}
-	execve(path, cmd->argv, new_envp);
-	handle_exec_error(path, 0);
-	free(path);
-	cleanup_shell(data->shell);
-	free_pipe_data(data);
-	free_env_array(new_envp);
-	exit(127);
+	exec_external(data, cmd, new_envp);
 }
-/*
-static void	exec_child(t_pipe_data *data, t_cmd *cmd, char **envp)
-{
-	int		j;
-	char	*path;
-
-	j = 0;
-	while (j < data->cmd_count - 1)
-	{
-		close(data->pipes[j][0]);
-		close(data->pipes[j][1]);
-		j++;
-	}
-	if (apply_redirs(cmd) == -1)
-		exit(1);
-	if (is_builtin(cmd->argv[0]))
-		exit(exec_builtin(cmd, NULL, data->env_list));
-	path = find_exec(cmd->argv[0], envp);
-	if (!path && !is_builtin(cmd->argv[0]))
-	{
-		handle_exec_error(cmd->argv[0], 1);
-		exit(127);
-	}
-	execve(path, cmd->argv, envp);
-	handle_exec_error(path, 1);
-	free(path);
-	exit(127);
-}
-*/
 
 void	child_process(t_pipe_data *data, t_cmd *cmd, char **envp)
 {

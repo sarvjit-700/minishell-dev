@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/28 13:36:34 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/18 10:48:26 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/12/11 14:27:23 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,17 +27,6 @@ static void	free_parts(char **arr, char *cmd_path, int x)
 		i++;
 	}
 	free(arr);
-}
-
-static char	*get_env_path(char **envp)
-{
-	while (*envp)
-	{
-		if (ft_strncmp(*envp, "PATH=", 5) == 0)
-			return (*envp + 5);
-		envp++;
-	}
-	return (NULL);
 }
 
 static char	*direct_path(char *cmd)
@@ -71,7 +60,7 @@ static char	*search_in_paths(char **paths, char *cmd)
 	return (NULL);
 }
 
-char	*find_exec(char *cmd, char **envp)
+char	*find_exec(char *cmd, t_env *env_list)
 {
 	char	*env_path;
 	char	**paths;
@@ -82,7 +71,7 @@ char	*find_exec(char *cmd, char **envp)
 	if (ft_strchr(cmd, '/'))
 		return (direct_path(cmd));
 	full_path = NULL;
-	env_path = get_env_path(envp);
+	env_path = get_env_value(env_list, "PATH");
 	if (env_path == NULL)
 		return (NULL);
 	paths = ft_split(env_path, ':');

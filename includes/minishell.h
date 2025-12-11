@@ -161,11 +161,11 @@ int			start_cmd(t_parser_state *ps);
 int			handle_word(t_parser_state *ps);
 
 // -- OPERATORS -- //
-int			init_pipe_data(t_cmd *cmd_list, char **envp, t_env **env_list, t_shell *shell);
+int			init_pipe_data(t_cmd *cmd_list, char **envp,
+				t_env **env_list, t_shell *shell);
 
 // -- pipe_utils --//
 int			**create_pipes(t_pipe_data *data);
-void		close_parent_pipes(t_pipe_data *data);
 void		child_process(t_pipe_data *data, t_cmd *cmd, char **envp);
 
 // -- redirs -- //
@@ -203,6 +203,7 @@ char		*expand_dollar(char *str, int *i, t_shell *shell, char *res);
 // -- EXECUTION -- //
 // -- Signal Handler -- //
 void		setup_signal_handlers(int sig_type);
+void		heredoc_sigint(int sig);
 
 // -- executor --//
 int			execute(t_shell *shell, char **envp);
@@ -219,7 +220,7 @@ char		**env_to_array(t_env *env_list);
 void		run_shell(t_shell *shell, char **envp);
 
 // -- paths -- //
-char		*find_exec(char *cmd, char **envp);
+char		*find_exec(char *cmd, t_env *env_list);
 
 // -- Handle Error -- //
 void		*handle_ptr_err(const char *msg, int code);
@@ -246,4 +247,9 @@ int			builtin_env(t_env *env_list);
 int			builtin_pwd(void);
 int			builtin_exit(t_cmd *cmd, t_shell *shell);
 
+// -- clean exit -- //
+void		clean_pipe_exit(t_pipe_data *data, char **envp, int code);
+void		clean_child_exit(t_shell *shell, char *path, int code);
+void		hd_exit(t_shell *shell, int write_fd, int code);
+void		close_parent_pipes(t_pipe_data *data);
 #endif

@@ -21,11 +21,11 @@ static t_cmd	*new_command(void)
 		return (NULL);
 	ft_memset(new_cmd, 0, sizeof(t_cmd));
 	new_cmd->argv = ft_calloc(1, sizeof(char *));
-    if (!new_cmd->argv)
-    {
-        free(new_cmd);
-        return (NULL);
-    }
+	if (!new_cmd->argv)
+	{
+		free(new_cmd);
+		return (NULL);
+	}
 	return (new_cmd);
 }
 

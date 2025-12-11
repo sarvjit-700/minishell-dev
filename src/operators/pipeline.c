@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/05 11:54:04 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/12/10 21:38:03 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/12/11 15:07:40 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,8 @@ static int	execute_pipeline(t_pipe_data *data, t_cmd *cmd_list, char **envp)
 	return (status);
 }
 
-int	init_pipe_data(t_cmd *cmd_list, char **envp, t_env **env_list, t_shell *shell)
+int	init_pipe_data(t_cmd *cmd_list, char **envp,
+	t_env **env_list, t_shell *shell)
 {
 	t_pipe_data	*data;
 	int			status;

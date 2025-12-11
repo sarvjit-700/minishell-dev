@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/10 23:35:17 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/12/10 22:02:41 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/12/11 14:35:30 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,8 +110,7 @@ int	main(int argc, char **argv, char **envp)
 	if (init_shell(shell, envp))
 		return (1);
 	run_shell(shell, envp);
-	rl_clear_history(); 
-    clear_history();
+	rl_clear_history();
 	cleanup_shell(shell);
 	exit(g_exit_code);
 }

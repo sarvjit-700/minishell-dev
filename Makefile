@@ -41,6 +41,7 @@ SRC = $(PREP)/lexer_main.c $(PREP)/lexer_utils.c $(PREP)/tokenizer.c\
  	$(EXEC)/executor.c $(EXEC)/exec_cmd.c $(EXEC)/run_shell.c $(EXEC)/paths.c\
 	$(EXEC)/cleanup_shell.c $(EXEC)/cleanup_general.c $(EXEC)/add_new_shell.c\
 	$(EXEC)/build_envp_copy.c $(EXEC)/handle_err.c $(EXEC)/signal_handler.c\
+	$(EXEC)/clean_exit.c\
 	$(OPS)/redirs.c	$(OPS)/heredoc.c $(OPS)/pipeline.c $(OPS)/pipe_utils.c\
 	$(XPAND)/expand_vars.c $(XPAND)/expand_dollar.c $(XPAND)/expand_string.c\
 	$(XPAND)/expand_redir.c $(XPAND)/expand_utils.c\

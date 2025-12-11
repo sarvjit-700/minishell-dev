@@ -11,77 +11,34 @@
 /* ************************************************************************** */
 
 #include "minishell.h"
-/*
-static void run_heredoc_child(int write_fd, const char *delimiter)
-{
-    char    *line;
-    size_t  len;
 
-    setup_signal_handlers(2);
-    while (1)
-    {
-        if (isatty(STDIN_FILENO))
-            write(1, "> ", 2);
-        line = get_next_line(STDIN_FILENO);
-        if (!line)
-        {
-            close(write_fd);
-            exit(0);
-        }
-        len = ft_strlen(line);
-        if (len > 0 && line[len - 1] == '\n')
-            line[len - 1] = '\0';
-        if (ft_strcmp(line, delimiter) == 0)
-        {
-            free(line);
-            close(write_fd);
-            exit(0);
-        }
-		if (len > 0) // Check if we null-terminated it
-            line[len - 1] = '\n';
-        write(write_fd, line, ft_strlen(line));
-        free(line);
-    }
-}
-*/
-
-static void	run_heredoc_child(int write_fd, const char *delimiter, t_shell *shell)
+static void	run_hd_child(int write_fd, const char *delimiter, t_shell *shell)
 {
 	char	*line;
 
-	setup_signal_handlers(2);
+	signal(SIGINT, heredoc_sigint);
+	signal(SIGQUIT, SIG_IGN);
 	while (1)
 	{
 		line = readline("> ");
 		if (g_exit_code == 130)
-        {
-            if (line)
-                free(line);
-            rl_clear_history(); 
-            close(write_fd);
-			cleanup_shell(shell);
-            exit(130);
-        }
-		if (!line)
 		{
-			close(write_fd);
-			cleanup_shell(shell);
-			exit(0);
+			if (line)
+				free(line);
+			hd_exit(shell, write_fd, 130);
 		}
+		if (!line)
+			hd_exit(shell, write_fd, 0);
 		if (ft_strcmp(line, delimiter) == 0)
 		{
 			free(line);
-			rl_clear_history();
-			close(write_fd);
-			cleanup_shell(shell);
-			exit(0);
+			hd_exit(shell, write_fd, 0);
 		}
 		write(write_fd, line, ft_strlen(line));
 		write(write_fd, "\n", 1);
 		free(line);
 	}
 }
-
 
 static int	handle_heredoc_parent(pid_t pid, int *pipefd)
 {
@@ -121,7 +78,7 @@ static int	create_heredoc(const char *delimiter, t_shell *shell)
 		return (-1);
 	}
 	if (pid == 0)
-		run_heredoc_child(pipefd[1], delimiter, shell);
+		run_hd_child(pipefd[1], delimiter, shell);
 	return (handle_heredoc_parent(pid, pipefd));
 }
 

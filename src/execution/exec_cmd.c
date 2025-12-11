@@ -38,18 +38,19 @@ static int	run_builtin(t_shell *shell, t_cmd *cmd)
 
 static void	run_exec_child(t_shell *shell, t_cmd *cmd, char *path, char **envp)
 {
+	int	exit_code;
+
 	setup_signal_handlers(2);
 	if (apply_redirs(cmd) == -1)
-		exit(1);
+		clean_child_exit(shell, path, 1);
 	if (is_builtin(cmd->argv[0]))
 	{
-		free(path);
-		exit(exec_builtin(cmd, shell, &shell->env_list));
+		exit_code = (exec_builtin(cmd, shell, &shell->env_list));
+		clean_child_exit(shell, path, exit_code);
 	}
 	execve(path, cmd->argv, envp);
 	handle_exec_error(cmd->argv[0], 0);
-	free(path);
-	exit(127);
+	clean_child_exit(shell, path, 127);
 }
 
 static int	spawn_child(t_shell *shell, t_cmd *cmd, char *path, char **envp)
@@ -98,7 +99,7 @@ int	execute_command(t_shell *shell, t_cmd *cmd, char **envp)
 
 	if (handle_parent_logic(shell, cmd))
 		return (g_exit_code);
-	path = find_exec(cmd->argv[0], envp);
+	path = find_exec(cmd->argv[0], shell->env_list);
 	if (!path)
 	{
 		handle_exec_error(cmd->argv[0], 0);
