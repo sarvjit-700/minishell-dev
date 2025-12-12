@@ -50,7 +50,7 @@ static void	run_exec_child(t_shell *shell, t_cmd *cmd, char *path, char **envp)
 	}
 	execve(path, cmd->argv, envp);
 	handle_exec_error(cmd->argv[0], 0);
-	clean_child_exit(shell, path, 127);
+	clean_child_exit(shell, path, g_exit_code);
 }
 
 static int	spawn_child(t_shell *shell, t_cmd *cmd, char *path, char **envp)

@@ -59,12 +59,12 @@ static void	exec_external(t_pipe_data *data, t_cmd *cmd, char **new_envp)
 	if (!path && !is_builtin(cmd->argv[0]))
 	{
 		handle_exec_error(cmd->argv[0], 0);
-		clean_pipe_exit(data, new_envp, 127);
+		clean_pipe_exit(data, new_envp, g_exit_code);
 	}
 	execve(path, cmd->argv, new_envp);
 	handle_exec_error(path, 0);
 	free(path);
-	clean_pipe_exit(data, new_envp, 127);
+	clean_pipe_exit(data, new_envp, g_exit_code);
 }
 
 static void	exec_child(t_pipe_data *data, t_cmd *cmd, char **envp)
