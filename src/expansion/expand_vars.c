@@ -88,7 +88,14 @@ static void	expand_cmd_argv(t_cmd *cmd, t_shell *shell)
 	char	**new_argv;
 
 	final_count = count_expanded_argv(cmd, shell);
-	if (final_count <= 0)
+	if (final_count == 0)
+	{
+		free_argv(cmd->argv);
+		cmd->argv = NULL;
+		cmd->argc = 0;
+		return ;
+	}
+	if (final_count < 0)
 		return ;
 	new_argv = malloc(sizeof(char *) * (final_count + 1));
 	if (!new_argv)
