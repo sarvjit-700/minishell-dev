@@ -93,6 +93,7 @@ static void	expand_cmd_argv(t_cmd *cmd, t_shell *shell)
 		free_argv(cmd->argv);
 		cmd->argv = NULL;
 		cmd->argc = 0;
+		g_exit_code = 0;
 		return ;
 	}
 	if (final_count < 0)

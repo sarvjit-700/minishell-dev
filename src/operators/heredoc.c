@@ -18,6 +18,7 @@ static void	run_hd_child(int write_fd, const char *delimiter, t_shell *shell)
 
 	signal(SIGINT, heredoc_sigint);
 	signal(SIGQUIT, SIG_IGN);
+	g_exit_code = 0;
 	while (1)
 	{
 		line = readline("> ");
