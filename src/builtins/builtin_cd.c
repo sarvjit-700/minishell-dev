@@ -6,7 +6,7 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 10:44:47 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/12/11 20:27:05 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/12/13 16:29:56 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,9 @@
 int	print_cd_error(const char *target, int err_code)
 {
 	if (err_code == 1)
-		write(2, "minishell: cd: HOME not set", 27);
+		write(2, "minishell: cd: HOME not set\n", 28);
 	else if (err_code == 2)
-		write(2, "minishell: cd: OLDPWD not set", 29);
+		write(2, "minishell: cd: OLDPWD not set\n", 30);
 	else if (err_code == 3)
 	{
 		write(2, "minishell: cd: ", 15);
