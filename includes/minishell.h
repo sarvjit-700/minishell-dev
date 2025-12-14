@@ -169,6 +169,7 @@ int			**create_pipes(t_pipe_data *data);
 void		child_process(t_pipe_data *data, t_cmd *cmd, char **envp);
 
 // -- redirs -- //
+char		*expand_char(char *dst, char c);
 int			apply_redirs(t_cmd *cmd);
 int			process_heredocs(t_cmd *cmd_list, t_shell *shell);
 

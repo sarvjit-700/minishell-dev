@@ -6,11 +6,20 @@
 /*   By: ssukhija <ssukhija@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 09:39:10 by ssukhija          #+#    #+#             */
-/*   Updated: 2025/11/26 10:50:15 by ssukhija         ###   ########.fr       */
+/*   Updated: 2025/12/14 11:20:47 by ssukhija         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+char	*expand_char(char *dst, char c)
+{
+	char	buf[2];
+
+	buf[0] = c;
+	buf[1] = '\0';
+	return (expand_var(dst, buf));
+}
 
 static int	print_ambiguous(char *filename)
 {
