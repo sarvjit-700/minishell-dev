@@ -6,21 +6,19 @@ Minishell is a minimalist, custom implementation of a POSIX-compliant shell, hea
 The shell successfully interprets a command-line prompt, resolves executables via the PATH environment variable, and manages complex pipelines (|) and file redirections (<, >, <<, >>). It also includes custom implementations of standard built-in commands such as cd, echo, pwd, export, unset, env, and exit.
 
 # INSTRUCTIONS
-Prerequisites
-To compile and run Minishell, you will need a C compiler (cc, gcc, or clang), make, and the GNU readline library installed on your system.
 
-Compilation
+## Compilation
 Clone the repository and build the executable using the provided Makefile:
 
-Bash
-make
+Bash: make
+
 This will compile the source files and generate the ./minishell executable. Additional rules include make clean (to remove object files), make fclean (to remove objects and the executable), and make re (to recompile from scratch).
 
-Execution
+## Execution
 Launch the interactive shell by running:
 
-Bash
-./minishell
+Bash: ./minishell
+
 Once inside, you can execute standard UNIX commands. To exit the shell, type exit or press Ctrl+D.
 
 # RESOURCES
